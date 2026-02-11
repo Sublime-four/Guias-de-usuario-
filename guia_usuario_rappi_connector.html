@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia Funcional - Rappi Connector | COONDEV</title>
+    <style>
+        :root {
+            --primary: #7B5B7B;
+            --primary-dark: #5E3F5E;
+            --primary-light: #9B7B9B;
+            --secondary: #4A2D4A;
+            --accent: #C9A0C9;
+            --dark: #2E1A2E;
+            --gray-100: #f8f7f9;
+            --gray-200: #eae7ec;
+            --gray-300: #ddd8df;
+            --gray-400: #c4bdc7;
+            --gray-500: #9e95a1;
+            --gray-600: #6c636f;
+            --gray-700: #4a434d;
+            --gray-800: #342e37;
+            --gray-900: #211c23;
+            --white: #ffffff;
+            --success: #5a9e6f;
+            --warning: #c9a84c;
+            --danger: #b5545a;
+            --info: #6b8fa8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.7;
+            color: var(--gray-800);
+            background: var(--gray-100);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 50%, var(--primary-light) 100%);
+            color: var(--white);
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(75,45,75,0.25);
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo-area { display: flex; align-items: center; gap: 20px; }
+        .logo-area svg { height: 48px; width: auto; }
+
+        .header-badge {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 40%, var(--primary-light) 100%);
+            color: var(--white);
+            padding: 60px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 60%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .hero-content {
+            position: relative; z-index: 1;
+            max-width: 800px; margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 42px; font-weight: 800;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .hero .version-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 4px 14px; border-radius: 15px;
+            font-size: 13px; margin-bottom: 20px;
+        }
+
+        .hero p { font-size: 18px; opacity: 0.9; max-width: 600px; margin: 0 auto; }
+
+        .hero-meta {
+            display: flex; justify-content: center;
+            gap: 30px; margin-top: 30px; flex-wrap: wrap;
+        }
+
+        .hero-meta-item {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 10px 20px; border-radius: 10px; font-size: 13px;
+        }
+
+        .hero-meta-item strong {
+            display: block; font-size: 11px;
+            text-transform: uppercase; letter-spacing: 1px;
+            opacity: 0.7; margin-bottom: 2px;
+        }
+
+        .nav-bar {
+            background: var(--white);
+            border-bottom: 2px solid var(--gray-200);
+            padding: 0 40px;
+            position: sticky; top: 78px; z-index: 999;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .nav-bar ul {
+            list-style: none; display: flex; gap: 0;
+            max-width: 1400px; margin: 0 auto; overflow-x: auto;
+        }
+
+        .nav-bar ul li a {
+            display: block; padding: 14px 20px;
+            color: var(--gray-600); text-decoration: none;
+            font-size: 13px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s; white-space: nowrap;
+        }
+
+        .nav-bar ul li a:hover {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: rgba(123,91,123,0.06);
+        }
+
+        .main-content { max-width: 1200px; margin: 0 auto; padding: 40px; }
+
+        .section {
+            background: var(--white); border-radius: 16px;
+            padding: 40px; margin-bottom: 30px;
+            box-shadow: 0 2px 20px rgba(75,45,75,0.06);
+            border: 1px solid var(--gray-200);
+        }
+
+        .section-header {
+            display: flex; align-items: center; gap: 15px;
+            margin-bottom: 30px; padding-bottom: 20px;
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .section-icon {
+            width: 50px; height: 50px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; flex-shrink: 0;
+        }
+
+        .section-icon.mauve { background: linear-gradient(135deg, var(--primary-light), var(--primary)); color: white; }
+        .section-icon.deep { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; }
+        .section-icon.soft { background: linear-gradient(135deg, var(--accent), var(--primary-light)); color: white; }
+        .section-icon.warm { background: linear-gradient(135deg, #c9a84c, #b8943e); color: white; }
+        .section-icon.plum { background: linear-gradient(135deg, #8e6b8e, #6b3f6b); color: white; }
+        .section-icon.sage { background: linear-gradient(135deg, #7ba88e, #5a9e6f); color: white; }
+
+        .section-header h2 { font-size: 24px; color: var(--secondary); font-weight: 700; }
+
+        .section-header h2 small {
+            display: block; font-size: 12px; color: var(--gray-500);
+            font-weight: 400; text-transform: uppercase;
+            letter-spacing: 2px; margin-top: 4px;
+        }
+
+        .section p { margin-bottom: 15px; color: var(--gray-700); }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #f5eef5, #faf5fa);
+            border-left: 4px solid var(--primary);
+            padding: 15px 20px; border-radius: 0 10px 10px 0; margin: 20px 0;
+        }
+
+        .highlight-box.info {
+            background: linear-gradient(135deg, #eee8f0, #f5eff7);
+            border-left-color: var(--info);
+        }
+
+        .highlight-box.success {
+            background: linear-gradient(135deg, #e8f0eb, #eff5f1);
+            border-left-color: var(--success);
+        }
+
+        .highlight-box.danger {
+            background: linear-gradient(135deg, #f0e8e9, #f7eff0);
+            border-left-color: var(--danger);
+        }
+
+        .highlight-box strong { display: block; margin-bottom: 5px; color: var(--gray-800); }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px; margin: 20px 0;
+        }
+
+        .feature-card {
+            background: var(--gray-100); border: 1px solid var(--gray-200);
+            border-radius: 12px; padding: 25px; transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(75,45,75,0.12);
+            border-color: var(--primary);
+        }
+
+        .feature-card .icon { font-size: 28px; margin-bottom: 12px; }
+        .feature-card h4 { color: var(--secondary); margin-bottom: 8px; font-size: 16px; }
+        .feature-card p { font-size: 13px; color: var(--gray-600); margin-bottom: 0; }
+
+        .workflow-container { overflow-x: auto; padding: 20px 0; }
+
+        .workflow-diagram {
+            display: flex; align-items: center; gap: 0;
+            min-width: 900px; padding: 20px;
+        }
+
+        .workflow-step {
+            display: flex; flex-direction: column; align-items: center;
+            min-width: 110px; position: relative;
+        }
+
+        .workflow-node {
+            width: 80px; height: 80px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px; color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            position: relative; z-index: 2;
+        }
+
+        .workflow-node.received { background: linear-gradient(135deg, #9e95a1, #b5aeb8); }
+        .workflow-node.processing { background: linear-gradient(135deg, #c9a84c, #b8943e); }
+        .workflow-node.accepted { background: linear-gradient(135deg, #6b8fa8, #5a7e97); }
+        .workflow-node.preparing { background: linear-gradient(135deg, #c49a5c, #b38a4c); }
+        .workflow-node.ready { background: linear-gradient(135deg, #7B5B7B, #6b4b6b); }
+        .workflow-node.dispatched { background: linear-gradient(135deg, #8e6b8e, #7a577a); }
+        .workflow-node.delivered { background: linear-gradient(135deg, #5a9e6f, #4a8e5f); }
+        .workflow-node.canceled { background: linear-gradient(135deg, #b5545a, #a5444a); }
+        .workflow-node.failed { background: linear-gradient(135deg, #7a3035, #5a2025); }
+
+        .workflow-label {
+            margin-top: 10px; font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            color: var(--gray-700); text-align: center;
+        }
+
+        .workflow-arrow {
+            width: 40px; height: 3px; background: var(--gray-400);
+            position: relative; margin: 0 -5px; margin-bottom: 30px;
+        }
+
+        .workflow-arrow::after {
+            content: ''; position: absolute; right: -6px; top: -4px;
+            border: 5px solid transparent; border-left: 8px solid var(--gray-400);
+        }
+
+        .vflow { position: relative; padding-left: 60px; margin: 30px 0; }
+
+        .vflow::before {
+            content: ''; position: absolute; left: 28px; top: 0; bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary), var(--accent));
+            border-radius: 2px;
+        }
+
+        .vflow-step {
+            position: relative; margin-bottom: 25px; padding: 20px;
+            background: var(--gray-100); border-radius: 12px;
+            border: 1px solid var(--gray-200);
+        }
+
+        .vflow-step::before {
+            content: attr(data-step); position: absolute;
+            left: -48px; top: 20px; width: 36px; height: 36px;
+            border-radius: 50%; background: var(--primary); color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 14px;
+            box-shadow: 0 3px 10px rgba(123,91,123,0.35); z-index: 2;
+        }
+
+        .vflow-step h4 { color: var(--secondary); margin-bottom: 8px; font-size: 16px; }
+        .vflow-step p { font-size: 14px; color: var(--gray-600); margin-bottom: 0; }
+
+        .bidir-flow {
+            display: grid; grid-template-columns: 1fr 100px 1fr;
+            gap: 0; align-items: center; margin: 30px 0;
+        }
+
+        .bidir-box {
+            background: var(--gray-100); border: 2px solid var(--gray-300);
+            border-radius: 16px; padding: 25px; text-align: center;
+        }
+
+        .bidir-box.rappi {
+            border-color: var(--primary-light);
+            background: linear-gradient(135deg, #f5eef5, #ede4ed);
+        }
+
+        .bidir-box.odoo {
+            border-color: var(--secondary);
+            background: linear-gradient(135deg, #ede4ed, #e5dae5);
+        }
+
+        .bidir-box h4 { font-size: 18px; margin-bottom: 10px; }
+        .bidir-box.rappi h4 { color: var(--primary); }
+        .bidir-box.odoo h4 { color: var(--secondary); }
+
+        .bidir-center { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .bidir-center .arrow-right, .bidir-center .arrow-left { font-size: 22px; color: var(--gray-500); }
+
+        .bidir-center .label {
+            font-size: 10px; text-transform: uppercase;
+            letter-spacing: 1px; color: var(--gray-500); font-weight: 600;
+        }
+
+        .table-responsive { overflow-x: auto; margin: 20px 0; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+
+        table thead th {
+            background: var(--secondary); color: var(--white);
+            padding: 12px 16px; text-align: left; font-weight: 600;
+            font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        table thead th:first-child { border-radius: 10px 0 0 0; }
+        table thead th:last-child { border-radius: 0 10px 0 0; }
+        table tbody td { padding: 12px 16px; border-bottom: 1px solid var(--gray-200); }
+        table tbody tr:hover { background: var(--gray-100); }
+        table tbody tr:last-child td:first-child { border-radius: 0 0 0 10px; }
+        table tbody tr:last-child td:last-child { border-radius: 0 0 10px 0; }
+
+        .badge {
+            display: inline-block; padding: 4px 10px; border-radius: 6px;
+            font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        .badge-received { background: #e2e0e5; color: #4a434d; }
+        .badge-processing { background: #f0e8d4; color: #7a6530; }
+        .badge-accepted { background: #dce8ef; color: #3a5f75; }
+        .badge-preparing { background: #f0e5d4; color: #7a6030; }
+        .badge-ready { background: #e5dae5; color: #5E3F5E; }
+        .badge-dispatched { background: #e8dde8; color: #6b3f6b; }
+        .badge-delivered { background: #dce8e0; color: #3a6b4a; }
+        .badge-canceled { background: #f0dfe0; color: #7a3035; }
+        .badge-failed { background: #e8d5d7; color: #5a2025; }
+        .badge-pending { background: #e0dee2; color: #342e37; }
+        .badge-done { background: #d4e5da; color: #2a5a3a; }
+        .badge-dead { background: #5a2025; color: white; }
+
+        .faq-item {
+            border: 1px solid var(--gray-200); border-radius: 12px;
+            margin-bottom: 12px; overflow: hidden; transition: all 0.3s;
+        }
+
+        .faq-item:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 15px rgba(123,91,123,0.12);
+        }
+
+        .faq-question {
+            padding: 18px 20px; background: var(--gray-100);
+            font-weight: 700; color: var(--secondary); cursor: pointer;
+            display: flex; align-items: center; gap: 12px;
+        }
+
+        .faq-question .q-marker {
+            background: var(--primary); color: white;
+            width: 28px; height: 28px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 800; flex-shrink: 0;
+        }
+
+        .faq-answer {
+            padding: 18px 20px; padding-left: 60px;
+            color: var(--gray-700); font-size: 14px;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .footer {
+            background: var(--dark); color: var(--gray-500);
+            padding: 40px; text-align: center;
+        }
+
+        .footer .company-name {
+            font-size: 22px; font-weight: 800; color: var(--white);
+            letter-spacing: 3px; margin-bottom: 5px;
+        }
+
+        .footer .tagline {
+            font-size: 12px; letter-spacing: 2px;
+            text-transform: uppercase; margin-bottom: 20px;
+        }
+
+        .footer-divider {
+            width: 60px; height: 3px; background: var(--primary);
+            margin: 20px auto; border-radius: 2px;
+        }
+
+        .footer p { font-size: 13px; margin-bottom: 5px; }
+
+        .endpoint-card {
+            background: var(--gray-100); border: 1px solid var(--gray-200);
+            border-radius: 10px; padding: 20px; margin: 15px 0;
+        }
+
+        .endpoint-card .method {
+            display: inline-block; padding: 3px 10px; border-radius: 5px;
+            font-size: 11px; font-weight: 800; margin-right: 8px;
+        }
+
+        .method-recibir { background: var(--success); color: white; }
+        .method-consultar { background: var(--info); color: white; }
+
+        .endpoint-card .path { font-size: 14px; color: var(--gray-800); font-weight: 600; }
+        .endpoint-card .desc { margin-top: 8px; font-size: 13px; color: var(--gray-600); }
+
+        .group-card {
+            display: flex; align-items: flex-start; gap: 15px;
+            padding: 20px; background: var(--gray-100);
+            border-radius: 12px; margin: 10px 0;
+        }
+
+        .group-icon {
+            width: 44px; height: 44px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; flex-shrink: 0;
+        }
+
+        .group-icon.user { background: linear-gradient(135deg, var(--primary-light), var(--primary)); color: white; }
+        .group-icon.admin { background: linear-gradient(135deg, var(--primary-dark), var(--secondary)); color: white; }
+
+        @media (max-width: 768px) {
+            .header-top { padding: 10px 20px; }
+            .hero { padding: 30px 20px; }
+            .hero h1 { font-size: 28px; }
+            .nav-bar { padding: 0 15px; }
+            .nav-bar ul li a { padding: 10px 12px; font-size: 11px; }
+            .main-content { padding: 20px; }
+            .section { padding: 25px; }
+            .bidir-flow { grid-template-columns: 1fr; gap: 15px; }
+            .bidir-center { flex-direction: row; }
+        }
+
+        @media print {
+            .header, .nav-bar { position: static; }
+            .section { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===================== HEADER ===================== -->
+<div class="header">
+    <div class="header-top">
+        <div class="logo-area">
+            <svg viewBox="0 0 240 48" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#9B7B9B"/>
+                        <stop offset="100%" style="stop-color:#C9A0C9"/>
+                    </linearGradient>
+                </defs>
+                <rect x="0" y="4" width="40" height="40" rx="10" fill="url(#logoGrad)"/>
+                <text x="20" y="32" font-family="Arial, sans-serif" font-size="26" font-weight="800" fill="white" text-anchor="middle">C</text>
+                <text x="52" y="22" font-family="Arial, sans-serif" font-size="18" font-weight="800" fill="white" letter-spacing="2">COONDEV</text>
+                <text x="52" y="38" font-family="Arial, sans-serif" font-size="8" fill="rgba(255,255,255,0.8)" letter-spacing="2">COONSULTING &amp; DEVELOPMENT</text>
+            </svg>
+        </div>
+        <div class="header-badge">GUIA FUNCIONAL v1.0</div>
+    </div>
+</div>
+
+<!-- ===================== HERO ===================== -->
+<div class="hero">
+    <div class="hero-content">
+        <div class="version-badge">Odoo 18 Enterprise</div>
+        <h1>Rappi Connector</h1>
+        <p>Integracion bidireccional entre Odoo 18 y el marketplace de Rappi para operaciones de restaurante y retail en Colombia.</p>
+        <div class="hero-meta">
+            <div class="hero-meta-item">
+                <strong>Modulo</strong>
+                Rappi Connector
+            </div>
+            <div class="hero-meta-item">
+                <strong>Categoria</strong>
+                Ventas / Punto de Venta
+            </div>
+            <div class="hero-meta-item">
+                <strong>Autor</strong>
+                Coondev
+            </div>
+            <div class="hero-meta-item">
+                <strong>Licencia</strong>
+                LGPL-3
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===================== NAVIGATION ===================== -->
+<div class="nav-bar">
+    <ul>
+        <li><a href="#introduccion">Introduccion</a></li>
+        <li><a href="#flujos">Flujos de Trabajo</a></li>
+        <li><a href="#parametros">Parametros</a></li>
+        <li><a href="#guia-paso-a-paso">Guia Paso a Paso</a></li>
+        <li><a href="#estados">Estados</a></li>
+        <li><a href="#trazabilidad">Trazabilidad</a></li>
+        <li><a href="#reportes">Reportes</a></li>
+        <li><a href="#faq">Preguntas y Respuestas</a></li>
+    </ul>
+</div>
+
+<!-- ===================== MAIN CONTENT ===================== -->
+<div class="main-content">
+
+    <!-- ========== 1. INTRODUCCION ========== -->
+    <div class="section" id="introduccion">
+        <div class="section-header">
+            <div class="section-icon mauve">&#9758;</div>
+            <h2>1. Introduccion <small>Vision general del modulo</small></h2>
+        </div>
+
+        <p>El modulo <strong>Rappi Connector</strong> establece una integracion bidireccional entre Odoo 18 y la plataforma de marketplace Rappi, disenado especificamente para operaciones de restaurantes y retail en Colombia.</p>
+
+        <div class="highlight-box info">
+            <strong>&#9432; Que resuelve este modulo?</strong>
+            Elimina la necesidad de transcribir pedidos manualmente desde la plataforma Rappi hacia Odoo. Automatiza la recepcion de pedidos, la creacion de ordenes (Punto de Venta o Ventas), la actualizacion de estados, la sincronizacion de catalogo de productos y la trazabilidad completa de cada transaccion.
+        </div>
+
+        <h3 style="margin: 25px 0 15px; color: var(--secondary);">Capacidades Principales</h3>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="icon">&#128230;</div>
+                <h4>Recepcion de Pedidos</h4>
+                <p>Recibe ordenes desde Rappi automaticamente y crea pedidos en el Punto de Venta o en el modulo de Ventas de Odoo.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">&#128260;</div>
+                <h4>Actualizacion de Estados</h4>
+                <p>Sincroniza estados del pedido en ambas direcciones: aceptado, preparando, listo, despachado, entregado o cancelado.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">&#128218;</div>
+                <h4>Catalogo de Productos</h4>
+                <p>Sincroniza productos, precios y disponibilidad de inventario hacia Rappi de forma automatica y programada.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">&#128270;</div>
+                <h4>Auditoria Completa</h4>
+                <p>Registro detallado de cada evento, control de duplicados, reintentos automaticos y bandeja de errores persistentes.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">&#128202;</div>
+                <h4>Panel de Control</h4>
+                <p>Vista tipo tablero con todas las ordenes agrupadas por estado para monitoreo en tiempo real.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">&#128274;</div>
+                <h4>Seguridad y Roles</h4>
+                <p>Roles de Usuario Rappi y Administrador Rappi con permisos diferenciados y validacion de seguridad en las comunicaciones.</p>
+            </div>
+        </div>
+
+        <h3 style="margin: 25px 0 15px; color: var(--secondary);">Dependencias del Modulo</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Modulo Requerido</th>
+                        <th>Descripcion</th>
+                        <th>Tipo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Base</strong></td><td>Modulo base de Odoo</td><td>Nucleo</td></tr>
+                    <tr><td><strong>Punto de Venta</strong></td><td>Gestion del punto de venta</td><td>Nucleo</td></tr>
+                    <tr><td><strong>Gestion de Ventas</strong></td><td>Ordenes y cotizaciones de venta</td><td>Nucleo</td></tr>
+                    <tr><td><strong>Inventario</strong></td><td>Gestion de almacen y existencias</td><td>Nucleo</td></tr>
+                    <tr><td><strong>Contabilidad</strong></td><td>Diarios y facturacion</td><td>Nucleo</td></tr>
+                    <tr><td><strong>Restaurante POS</strong></td><td>Funcionalidades de restaurante en POS</td><td>Nucleo</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ========== 2. FLUJOS DE TRABAJO ========== -->
+    <div class="section" id="flujos">
+        <div class="section-header">
+            <div class="section-icon deep">&#9881;</div>
+            <h2>2. Flujos de Trabajo <small>Diagramas de procesos graficos</small></h2>
+        </div>
+
+        <h3 style="margin-bottom: 20px; color: var(--secondary);">2.1 Comunicacion Bidireccional</h3>
+        <div class="bidir-flow">
+            <div class="bidir-box rappi">
+                <h4>&#128666; Rappi</h4>
+                <p style="font-size: 13px; color: var(--gray-600);">
+                    Marketplace<br>
+                    Envia ordenes automaticamente<br>
+                    Envia cancelaciones<br>
+                    Notifica estado de entrega
+                </p>
+            </div>
+            <div class="bidir-center">
+                <div class="arrow-right">&#10230;</div>
+                <div class="label">Notificacion</div>
+                <div class="label" style="font-size:9px; color: var(--primary);">Ordenes &bull; Estados</div>
+                <div style="width: 40px; height: 2px; background: var(--gray-300); margin: 5px 0;"></div>
+                <div class="arrow-left">&#10229;</div>
+                <div class="label">Respuesta</div>
+                <div class="label" style="font-size:9px; color: var(--secondary);">Estados &bull; Catalogo</div>
+            </div>
+            <div class="bidir-box odoo">
+                <h4>&#128187; Odoo 18</h4>
+                <p style="font-size: 13px; color: var(--gray-600);">
+                    ERP<br>
+                    Crea ordenes en POS o Ventas<br>
+                    Envia actualizaciones de estado<br>
+                    Sincroniza catalogo de productos
+                </p>
+            </div>
+        </div>
+
+        <h3 style="margin: 35px 0 15px; color: var(--secondary);">2.2 Flujo de Orden Entrante (Rappi &#10140; Odoo)</h3>
+        <div class="vflow">
+            <div class="vflow-step" data-step="1">
+                <h4>Rappi envia la notificacion del pedido</h4>
+                <p>La plataforma de Rappi envia automaticamente los datos del nuevo pedido hacia Odoo, incluyendo una firma de seguridad para verificar su autenticidad.</p>
+            </div>
+            <div class="vflow-step" data-step="2">
+                <h4>Validacion de seguridad</h4>
+                <p>El sistema valida la firma de seguridad del mensaje, identifica la tienda correspondiente y busca la configuracion activa asignada.</p>
+            </div>
+            <div class="vflow-step" data-step="3">
+                <h4>Registro del Evento</h4>
+                <p>Se crea un registro en el Historial de Eventos con un identificador unico de rastreo, los datos completos del pedido y el resultado de la validacion.</p>
+            </div>
+            <div class="vflow-step" data-step="4">
+                <h4>Encolamiento de la tarea</h4>
+                <p>Se crea una Tarea Entrante en estado <em>Pendiente</em> con los datos del pedido para procesamiento en segundo plano. Se responde inmediatamente a Rappi para evitar tiempos de espera.</p>
+            </div>
+            <div class="vflow-step" data-step="5">
+                <h4>Procesamiento automatico</h4>
+                <p>La accion programada <em>"Rappi: Procesar Ordenes Entrantes"</em> se ejecuta cada minuto y procesa hasta 20 tareas pendientes aplicando la logica de negocio.</p>
+            </div>
+            <div class="vflow-step" data-step="6">
+                <h4>Control de duplicados</h4>
+                <p>Se verifica si el identificador del pedido de Rappi ya existe en el Mapa de Ordenes. Si ya existe, se omite la creacion (control de duplicados) y se retorna el registro existente.</p>
+            </div>
+            <div class="vflow-step" data-step="7">
+                <h4>Creacion del Mapa de Orden</h4>
+                <p>Se crea el registro del Mapa de Ordenes Rappi con los datos del cliente, los totales financieros, el metodo de pago, los datos originales del pedido y el estado <em>Recibido</em>.</p>
+            </div>
+            <div class="vflow-step" data-step="8">
+                <h4>Creacion de la Orden en Odoo</h4>
+                <p>Segun el <strong>Modo de Orden</strong> configurado, se crea una <strong>Orden en Punto de Venta</strong> o una <strong>Orden de Venta</strong>. Los productos se buscan por su identificador Rappi, referencia interna, codigo de barras o nombre. Se agregan lineas de envio, propina y descuento.</p>
+            </div>
+            <div class="vflow-step" data-step="9">
+                <h4>Validacion de Totales</h4>
+                <p>Se compara el total reportado por Rappi contra el total calculado por Odoo. Si la diferencia supera la tolerancia configurada, se marca como <em>Diferencia de Precio</em> y se aplica la politica correspondiente.</p>
+            </div>
+            <div class="vflow-step" data-step="10">
+                <h4>Auto-Aceptacion (Opcional)</h4>
+                <p>Si la opcion de <strong>Auto-Aceptar pedidos Rappi</strong> esta habilitada, el estado se actualiza automaticamente a <em>Aceptado</em> y se crea una tarea saliente para notificar a Rappi.</p>
+            </div>
+        </div>
+
+        <h3 style="margin: 35px 0 20px; color: var(--secondary);">2.3 Flujo de Estados del Pedido</h3>
+        <div class="workflow-container">
+            <div class="workflow-diagram">
+                <div class="workflow-step">
+                    <div class="workflow-node received">&#128229;</div>
+                    <div class="workflow-label">Recibido</div>
+                </div>
+                <div class="workflow-arrow"></div>
+                <div class="workflow-step">
+                    <div class="workflow-node processing">&#9881;</div>
+                    <div class="workflow-label">Procesando</div>
+                </div>
+                <div class="workflow-arrow"></div>
+                <div class="workflow-step">
+                    <div class="workflow-node accepted">&#9989;</div>
+                    <div class="workflow-label">Aceptado</div>
+                </div>
+                <div class="workflow-arrow"></div>
+                <div class="workflow-step">
+                    <div class="workflow-node preparing">&#127859;</div>
+                    <div class="workflow-label">Preparando</div>
+                </div>
+                <div class="workflow-arrow"></div>
+                <div class="workflow-step">
+                    <div class="workflow-node ready">&#128230;</div>
+                    <div class="workflow-label">Listo</div>
+                </div>
+                <div class="workflow-arrow"></div>
+                <div class="workflow-step">
+                    <div class="workflow-node dispatched">&#128666;</div>
+                    <div class="workflow-label">Despachado</div>
+                </div>
+                <div class="workflow-arrow"></div>
+                <div class="workflow-step">
+                    <div class="workflow-node delivered">&#127775;</div>
+                    <div class="workflow-label">Entregado</div>
+                </div>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 10px;">
+            <span class="badge badge-canceled" style="font-size: 12px; padding: 6px 14px; margin: 0 5px;">&#10060; Cancelado</span>
+            <span class="badge badge-failed" style="font-size: 12px; padding: 6px 14px; margin: 0 5px; background: #5a2025; color: white;">&#9888; Fallido</span>
+            <span style="font-size: 12px; color: var(--gray-500); margin-left: 10px;">&#8592; Estados terminales (pueden ocurrir desde cualquier estado activo)</span>
+        </div>
+
+        <h3 style="margin: 35px 0 15px; color: var(--secondary);">2.4 Flujo de Actualizacion Saliente (Odoo &#10140; Rappi)</h3>
+        <div class="vflow">
+            <div class="vflow-step" data-step="1">
+                <h4>El operador cambia el estado en Odoo</h4>
+                <p>Desde la orden en Punto de Venta o en Ventas, el operador presiona un boton de accion (Aceptar, Preparando, Listo, Despachado, Cancelar).</p>
+            </div>
+            <div class="vflow-step" data-step="2">
+                <h4>Actualizacion del Mapa de Orden</h4>
+                <p>Se actualiza el registro del Mapa de Ordenes Rappi con el nuevo estado y la fecha/hora correspondiente.</p>
+            </div>
+            <div class="vflow-step" data-step="3">
+                <h4>Creacion de la Tarea Saliente</h4>
+                <p>Se crea una Tarea Saliente con una clave unica (pedido + estado) para evitar envios duplicados hacia Rappi.</p>
+            </div>
+            <div class="vflow-step" data-step="4">
+                <h4>Procesamiento automatico</h4>
+                <p>La accion programada <em>"Rappi: Procesar Actualizaciones Salientes"</em> se ejecuta cada minuto y procesa hasta 50 tareas. Realiza la comunicacion con el servicio de Rappi.</p>
+            </div>
+            <div class="vflow-step" data-step="5">
+                <h4>Confirmacion o Reintento</h4>
+                <p>Si Rappi responde exitosamente, la tarea se marca como <em>Completada</em>. Si falla, se reintenta segun los intervalos configurados (ej: 1, 5, 15, 60, 240 minutos). Tras agotar todos los reintentos, se mueve a la <em>Bandeja de Errores</em>.</p>
+            </div>
+        </div>
+
+        <h3 style="margin: 35px 0 15px; color: var(--secondary);">2.5 Flujo de Sincronizacion de Catalogo</h3>
+        <div class="vflow">
+            <div class="vflow-step" data-step="1">
+                <h4>Activacion de la sincronizacion</h4>
+                <p>En la configuracion de la tienda se activa <em>"Habilitar Sincronizacion de Catalogo"</em>. La accion programada correspondiente se ejecuta cada 30 minutos (requiere activacion manual la primera vez).</p>
+            </div>
+            <div class="vflow-step" data-step="2">
+                <h4>Seleccion de productos</h4>
+                <p>Se filtran los productos marcados como <strong>"Disponible en Rappi"</strong>. Cada producto se envia al servicio de Rappi con su nombre, precio, categoria y disponibilidad.</p>
+            </div>
+            <div class="vflow-step" data-step="3">
+                <h4>Sincronizacion de disponibilidad</h4>
+                <p>Se calcula el estado de stock comparando la cantidad disponible contra el umbral configurado. Si esta por debajo, se marca como <em>Agotado</em> en Rappi.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 3. PARAMETROS ========== -->
+    <div class="section" id="parametros">
+        <div class="section-header">
+            <div class="section-icon warm">&#9881;</div>
+            <h2>3. Parametros a Tener en Cuenta <small>Configuracion del conector</small></h2>
+        </div>
+
+        <h3 style="margin-bottom: 15px; color: var(--secondary);">3.1 Configuracion General de la Tienda</h3>
+        <p>Menu: <strong>Rappi Connector &gt; Configuracion &gt; Configuraciones de Tienda</strong></p>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Parametro</th>
+                        <th>Tipo</th>
+                        <th>Requerido</th>
+                        <th>Descripcion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Nombre de Tienda</strong></td><td>Texto</td><td>Si</td><td>Nombre descriptivo de la tienda</td></tr>
+                    <tr><td><strong>Identificador de Tienda Rappi</strong></td><td>Texto</td><td>Si</td><td>Codigo unico de la tienda en Rappi (debe ser unico)</td></tr>
+                    <tr><td><strong>Identificador de Sucursal</strong></td><td>Texto</td><td>No</td><td>Codigo de sucursal en Rappi (si aplica)</td></tr>
+                    <tr><td><strong>Modo</strong></td><td>Seleccion</td><td>Si</td><td><strong>Sandbox</strong> (pruebas) o <strong>Produccion</strong> (operacion real)</td></tr>
+                    <tr><td><strong>Compania</strong></td><td>Relacion</td><td>Si</td><td>Compania asociada (soporte multi-compania)</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">3.2 Credenciales de Conexion</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Parametro</th>
+                        <th>Descripcion</th>
+                        <th>Nota</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>URL Base del Servicio</strong></td><td>Direccion del servicio de Rappi</td><td>Valor predeterminado para Colombia</td></tr>
+                    <tr><td><strong>Clave de Conexion</strong></td><td>Clave proporcionada por Rappi</td><td>Almacenada de forma encriptada</td></tr>
+                    <tr><td><strong>Identificador de Cliente</strong></td><td>Identificador para autenticacion</td><td>Para autenticacion segura</td></tr>
+                    <tr><td><strong>Secreto de Cliente</strong></td><td>Secreto para autenticacion</td><td>Almacenado de forma encriptada</td></tr>
+                    <tr><td><strong>Token de Acceso</strong></td><td>Token vigente para comunicacion</td><td>Solo lectura, se renueva automaticamente</td></tr>
+                    <tr><td><strong>Expiracion del Token</strong></td><td>Fecha/hora de expiracion del token</td><td>Solo lectura</td></tr>
+                    <tr><td><strong>Secreto de Seguridad</strong></td><td>Secreto para validar las notificaciones entrantes</td><td>Almacenado de forma encriptada</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">3.3 Configuracion de Ordenes</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Parametro</th>
+                        <th>Opciones / Tipo</th>
+                        <th>Descripcion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Modo de Orden</strong></td><td><strong>Punto de Venta</strong> | <strong>Orden de Venta</strong></td><td>Donde se crearan las ordenes en Odoo</td></tr>
+                    <tr><td><strong>Configuracion POS</strong></td><td>Seleccion de Punto de Venta</td><td>Punto de venta donde se crearan las ordenes (solo en modo POS)</td></tr>
+                    <tr><td><strong>Diario de Pago Rappi</strong></td><td>Seleccion de Diario</td><td>Diario contable para registrar los pagos de Rappi</td></tr>
+                    <tr><td><strong>Lista de Precios</strong></td><td>Seleccion de Tarifa</td><td>Tarifa de precios que se aplicara a las ordenes Rappi</td></tr>
+                    <tr><td><strong>Cliente por Defecto</strong></td><td>Seleccion de Contacto</td><td>Contacto que se asigna cuando no se identifica un cliente especifico</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">3.4 Productos Especiales</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Parametro</th>
+                        <th>Descripcion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Producto de Propina</strong></td><td>Producto usado para registrar propinas en las ordenes</td></tr>
+                    <tr><td><strong>Producto de Costo de Envio</strong></td><td>Producto usado para registrar el valor del domicilio</td></tr>
+                    <tr><td><strong>Producto de Descuento</strong></td><td>Producto usado para registrar descuentos aplicados por Rappi (monto negativo)</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">3.5 Politicas de Precios y Modificadores</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Parametro</th>
+                        <th>Valor Predeterminado</th>
+                        <th>Descripcion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Tolerancia de Precio (%)</strong></td><td>1.0%</td><td>Diferencia porcentual permitida entre el total de Rappi y el calculado por Odoo</td></tr>
+                    <tr><td><strong>Politica ante Diferencia de Precio</strong></td><td>Alertar</td><td><strong>Usar Total de Rappi</strong> | <strong>Usar Total de Odoo</strong> | <strong>Alertar y Usar Rappi</strong></td></tr>
+                    <tr><td><strong>Politica ante Producto Desconocido</strong></td><td>Crear</td><td><strong>Crear Producto Temporal</strong> (genera un producto provisional) | <strong>Rechazar Orden</strong> (cancela el pedido)</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">3.6 Reintentos y Catalogo</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Parametro</th>
+                        <th>Valor Predeterminado</th>
+                        <th>Descripcion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Maximo de Reintentos</strong></td><td>5</td><td>Numero maximo de reintentos para tareas fallidas</td></tr>
+                    <tr><td><strong>Intervalos de Reintento</strong></td><td>1, 5, 15, 60, 240 minutos</td><td>Tiempos de espera entre cada reintento (en minutos)</td></tr>
+                    <tr><td><strong>Habilitar Sincronizacion de Catalogo</strong></td><td>Desactivado</td><td>Activa el envio automatico de productos hacia Rappi</td></tr>
+                    <tr><td><strong>Umbral de Stock</strong></td><td>0</td><td>Si la cantidad disponible es igual o menor a este valor, el producto se marca como agotado en Rappi</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">3.7 Parametros Generales del Sistema</h3>
+        <p>Ubicacion: <strong>Ajustes &gt; Rappi Connector</strong></p>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Parametro</th>
+                        <th>Descripcion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Configuracion Rappi por Defecto</strong></td><td>Tienda Rappi que se usara como configuracion principal</td></tr>
+                    <tr><td><strong>Auto-Aceptar Pedidos Rappi</strong></td><td>Si se activa, los pedidos se aceptan automaticamente al recibirlos</td></tr>
+                    <tr><td><strong>Habilitar Sincronizacion de Catalogo</strong></td><td>Activa la sincronizacion global de productos hacia Rappi</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ========== 4. GUIA PASO A PASO ========== -->
+    <div class="section" id="guia-paso-a-paso">
+        <div class="section-header">
+            <div class="section-icon sage">&#128221;</div>
+            <h2>4. Guia Paso a Paso <small>Configuracion e implementacion</small></h2>
+        </div>
+
+        <h3 style="margin-bottom: 15px; color: var(--secondary);">Paso 1: Instalar el Modulo</h3>
+        <div class="vflow">
+            <div class="vflow-step" data-step="1">
+                <h4>Instalar Rappi Connector</h4>
+                <p>Ir a <strong>Aplicaciones</strong>, buscar <em>"Rappi Connector"</em> y hacer clic en <strong>Instalar</strong>. El modulo instalara automaticamente las dependencias necesarias (Punto de Venta, Ventas, Inventario, Contabilidad, Restaurante POS).</p>
+            </div>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">Paso 2: Configurar la Tienda</h3>
+        <div class="vflow">
+            <div class="vflow-step" data-step="1">
+                <h4>Acceder a la configuracion</h4>
+                <p>Navegar a <strong>Rappi Connector &gt; Configuracion &gt; Configuraciones de Tienda</strong> y crear un nuevo registro.</p>
+            </div>
+            <div class="vflow-step" data-step="2">
+                <h4>Datos generales</h4>
+                <p>Completar: <strong>Nombre de Tienda</strong> (nombre descriptivo), <strong>Identificador de Tienda Rappi</strong> (proporcionado por Rappi), <strong>Identificador de Sucursal</strong> (si aplica), y seleccionar el <strong>Modo</strong> (Sandbox para pruebas, Produccion para operacion real).</p>
+            </div>
+            <div class="vflow-step" data-step="3">
+                <h4>Credenciales de Conexion</h4>
+                <p>Ingresar la <strong>URL Base del Servicio</strong>, la <strong>Clave de Conexion</strong>, el <strong>Identificador de Cliente</strong>, el <strong>Secreto de Cliente</strong> y el <strong>Secreto de Seguridad</strong> proporcionados por Rappi.</p>
+            </div>
+            <div class="vflow-step" data-step="4">
+                <h4>Probar conexion</h4>
+                <p>Presionar el boton <strong>"Probar Conexion"</strong> en la parte superior del formulario. Si es exitoso, mostrara una notificacion verde. Luego presionar <strong>"Renovar Token"</strong> para obtener el token de acceso.</p>
+            </div>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">Paso 3: Configurar el Modo de Ordenes</h3>
+        <div class="vflow">
+            <div class="vflow-step" data-step="1">
+                <h4>Seleccionar modo</h4>
+                <p>En <strong>Modo de Orden</strong>, elegir <strong>Punto de Venta</strong> (para restaurantes) o <strong>Orden de Venta</strong> (para retail/e-commerce).</p>
+            </div>
+            <div class="vflow-step" data-step="2">
+                <h4>Configurar Punto de Venta (si aplica)</h4>
+                <p>Si se selecciono modo POS, elegir la <strong>Configuracion POS</strong> (punto de venta) donde se crearan las ordenes. <strong>Importante:</strong> Debe haber una sesion de POS abierta para recibir ordenes.</p>
+            </div>
+            <div class="vflow-step" data-step="3">
+                <h4>Configurar pagos y productos</h4>
+                <p>Seleccionar el <strong>Diario de Pago Rappi</strong>, el <strong>Cliente por Defecto</strong>, y los productos para <strong>Propina</strong>, <strong>Costo de Envio</strong> y <strong>Descuento</strong>.</p>
+            </div>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">Paso 4: Configurar Productos para Rappi</h3>
+        <div class="vflow">
+            <div class="vflow-step" data-step="1">
+                <h4>Marcar productos como disponibles</h4>
+                <p>En cada producto, ir a la seccion <strong>"Marketplace Rappi"</strong> al final del formulario. Activar <strong>"Disponible en Rappi"</strong>.</p>
+            </div>
+            <div class="vflow-step" data-step="2">
+                <h4>Vincular identificadores de producto</h4>
+                <p>Ingresar el <strong>Identificador de Producto Rappi</strong> que coincida con el catalogo en Rappi. Opcionalmente completar la <strong>Categoria Rappi</strong>.</p>
+            </div>
+            <div class="vflow-step" data-step="3">
+                <h4>Sincronizar catalogo (opcional)</h4>
+                <p>Si se habilito la sincronizacion, presionar <strong>"Sincronizar con Rappi"</strong> para enviar el producto al catalogo de Rappi. La accion programada automatica se ejecutara cada 30 minutos.</p>
+            </div>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">Paso 5: Configurar la Comunicacion con Rappi</h3>
+        <div class="vflow">
+            <div class="vflow-step" data-step="1">
+                <h4>Registrar las direcciones de comunicacion en Rappi</h4>
+                <p>En el panel de administracion de Rappi, registrar las siguientes direcciones de comunicacion:</p>
+                <div class="endpoint-card">
+                    <span class="method method-recibir">RECIBIR</span>
+                    <span class="path">Direccion para recepcion de nuevas ordenes</span>
+                    <div class="desc">Rappi enviara los pedidos nuevos a esta direccion</div>
+                </div>
+                <div class="endpoint-card">
+                    <span class="method method-recibir">RECIBIR</span>
+                    <span class="path">Direccion para actualizaciones de estado</span>
+                    <div class="desc">Rappi enviara cancelaciones y cambios de estado del repartidor a esta direccion</div>
+                </div>
+                <div class="endpoint-card">
+                    <span class="method method-consultar">CONSULTAR</span>
+                    <span class="path">Direccion de verificacion de salud</span>
+                    <div class="desc">Rappi verificara que la comunicacion esta activa consultando esta direccion</div>
+                </div>
+            </div>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">Paso 6: Asignar Permisos a Usuarios</h3>
+        <div class="group-card">
+            <div class="group-icon user">&#128100;</div>
+            <div>
+                <h4 style="color: var(--secondary); margin-bottom: 5px;">Usuario Rappi</h4>
+                <p style="font-size: 13px; color: var(--gray-600); margin-bottom: 0;">Puede ver ordenes Rappi, actualizar estados (aceptar, preparar, listo, despachar, cancelar) y consultar el panel de control. <strong>No puede</strong> modificar configuraciones ni acceder a tareas y registros de monitoreo.</p>
+            </div>
+        </div>
+        <div class="group-card">
+            <div class="group-icon admin">&#128272;</div>
+            <div>
+                <h4 style="color: var(--secondary); margin-bottom: 5px;">Administrador Rappi</h4>
+                <p style="font-size: 13px; color: var(--gray-600); margin-bottom: 0;">Acceso completo: configuracion de tiendas, credenciales de conexion, monitoreo de tareas entrantes/salientes, registros de eventos, reintentos manuales y gestion de la bandeja de errores. Incluye todos los permisos del Usuario Rappi.</p>
+            </div>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">Paso 7: Operacion Diaria</h3>
+        <div class="vflow">
+            <div class="vflow-step" data-step="1">
+                <h4>Monitorear el Panel de Control</h4>
+                <p>Ir a <strong>Rappi Connector &gt; Panel de Control</strong> para ver todas las ordenes del dia organizadas por estado en formato de tablero. Hacer clic en una orden para ver sus detalles.</p>
+            </div>
+            <div class="vflow-step" data-step="2">
+                <h4>Gestionar ordenes</h4>
+                <p>Desde la orden en POS o en Ventas, usar los botones de accion: <strong>Aceptar</strong> &#10140; <strong>Preparando</strong> &#10140; <strong>Listo</strong> &#10140; <strong>Despachado</strong>. Cada accion actualiza el estado en Rappi automaticamente.</p>
+            </div>
+            <div class="vflow-step" data-step="3">
+                <h4>Cancelar o Rechazar ordenes</h4>
+                <p>Presionar <strong>"Cancelar Rappi"</strong> o <strong>"Rechazar"</strong>. Se abrira un asistente que solicita obligatoriamente un <strong>motivo</strong> y un <strong>codigo de razon</strong> (Stock Agotado, Tienda Cerrada, Muy Ocupado, Pedido Incorrecto, Solicitud del Cliente, Otro).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 5. ESTADOS DEL PROCESO ========== -->
+    <div class="section" id="estados">
+        <div class="section-header">
+            <div class="section-icon plum">&#128203;</div>
+            <h2>5. Estados del Proceso <small>Ciclo de vida de ordenes y tareas</small></h2>
+        </div>
+
+        <h3 style="margin-bottom: 15px; color: var(--secondary);">5.1 Estados del Pedido</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Estado</th>
+                        <th>Indicador</th>
+                        <th>Descripcion</th>
+                        <th>Transiciones Permitidas</th>
+                        <th>Terminal?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Recibido</strong></td>
+                        <td><span class="badge badge-received">Recibido</span></td>
+                        <td>Notificacion recibida, pedido registrado en el Mapa de Ordenes</td>
+                        <td>Procesando, Rechazado, Cancelado</td>
+                        <td>No</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Procesando</strong></td>
+                        <td><span class="badge badge-processing">Procesando</span></td>
+                        <td>La orden de Odoo se esta creando (POS o Venta)</td>
+                        <td>Aceptado, Rechazado, Fallido, Cancelado</td>
+                        <td>No</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Aceptado</strong></td>
+                        <td><span class="badge badge-accepted">Aceptado</span></td>
+                        <td>El operador acepta el pedido, se notifica a Rappi</td>
+                        <td>Preparando, Cancelado</td>
+                        <td>No</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Preparando</strong></td>
+                        <td><span class="badge badge-preparing">Preparando</span></td>
+                        <td>La cocina o almacen esta preparando el pedido</td>
+                        <td>Listo, Cancelado</td>
+                        <td>No</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Listo</strong></td>
+                        <td><span class="badge badge-ready">Listo</span></td>
+                        <td>Pedido listo para ser recogido por el repartidor</td>
+                        <td>Recogido, Despachado, Cancelado</td>
+                        <td>No</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Recogido</strong></td>
+                        <td><span class="badge badge-dispatched">Recogido</span></td>
+                        <td>El repartidor ha recogido el pedido</td>
+                        <td>Despachado, Entregado</td>
+                        <td>No</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Despachado</strong></td>
+                        <td><span class="badge badge-dispatched">Despachado</span></td>
+                        <td>Pedido en camino hacia el cliente</td>
+                        <td>Entregado</td>
+                        <td>No</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Entregado</strong></td>
+                        <td><span class="badge badge-delivered">Entregado</span></td>
+                        <td>Pedido entregado exitosamente al cliente final</td>
+                        <td>&#8212;</td>
+                        <td><strong>Si</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cancelado</strong></td>
+                        <td><span class="badge badge-canceled">Cancelado</span></td>
+                        <td>Pedido cancelado (por Odoo o por Rappi)</td>
+                        <td>&#8212;</td>
+                        <td><strong>Si</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Rechazado</strong></td>
+                        <td><span class="badge badge-canceled">Rechazado</span></td>
+                        <td>Pedido rechazado por el operador</td>
+                        <td>&#8212;</td>
+                        <td><strong>Si</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Fallido</strong></td>
+                        <td><span class="badge badge-failed">Fallido</span></td>
+                        <td>Error irrecuperable durante el procesamiento</td>
+                        <td>&#8212;</td>
+                        <td><strong>Si</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">5.2 Estados de las Tareas (Entrantes y Salientes)</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Estado</th>
+                        <th>Indicador</th>
+                        <th>Descripcion</th>
+                        <th>Acciones Disponibles</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Pendiente</strong></td>
+                        <td><span class="badge badge-pending">Pendiente</span></td>
+                        <td>Tarea en cola esperando ser procesada automaticamente</td>
+                        <td>&#8212;</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Procesando</strong></td>
+                        <td><span class="badge badge-processing">Procesando</span></td>
+                        <td>Tarea siendo procesada actualmente</td>
+                        <td>&#8212;</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Completada</strong></td>
+                        <td><span class="badge badge-done">Completada</span></td>
+                        <td>Tarea procesada exitosamente</td>
+                        <td>&#8212;</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Fallida</strong></td>
+                        <td><span class="badge badge-failed">Fallida</span></td>
+                        <td>Tarea fallo, sera reintentada automaticamente</td>
+                        <td>Reintentar, Mover a Bandeja de Errores</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bandeja de Errores</strong></td>
+                        <td><span class="badge badge-dead">Bandeja de Errores</span></td>
+                        <td>Tarea que fallo tras agotar todos los reintentos</td>
+                        <td>Reintentar (manual)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">5.3 Estados de Sincronizacion de Producto</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Estado</th>
+                        <th>Descripcion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><span class="badge badge-done">Sincronizado</span></td><td>Producto sincronizado exitosamente con Rappi</td></tr>
+                    <tr><td><span class="badge badge-processing">Pendiente de Sincronizacion</span></td><td>Producto marcado para sincronizacion en la proxima ejecucion automatica</td></tr>
+                    <tr><td><span class="badge badge-failed">Error de Sincronizacion</span></td><td>Ocurrio un error en la ultima sincronizacion</td></tr>
+                    <tr><td><span class="badge badge-pending">No Sincronizado</span></td><td>Producto aun no ha sido sincronizado con Rappi</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ========== 6. TRAZABILIDAD ========== -->
+    <div class="section" id="trazabilidad">
+        <div class="section-header">
+            <div class="section-icon sage">&#128269;</div>
+            <h2>6. Trazabilidad <small>Auditoria y seguimiento completo</small></h2>
+        </div>
+
+        <p>El modulo implementa un sistema de trazabilidad de extremo a extremo que permite rastrear cada operacion desde la recepcion de la notificacion del pedido hasta la entrega final.</p>
+
+        <h3 style="margin: 25px 0 15px; color: var(--secondary);">6.1 Identificador de Rastreo</h3>
+        <div class="highlight-box info">
+            <strong>&#9432; Identificador Unico de Correlacion</strong>
+            Cada notificacion recibida genera un <strong>Identificador de Rastreo</strong> unico que se propaga a traves de todos los registros relacionados: registros de eventos, tareas entrantes, tareas salientes y mapas de ordenes. Esto permite correlacionar todos los eventos de un mismo pedido de principio a fin.
+        </div>
+
+        <h3 style="margin: 25px 0 15px; color: var(--secondary);">6.2 Registro de Eventos</h3>
+        <p>Menu: <strong>Rappi Connector &gt; Monitoreo &gt; Registro de Eventos</strong></p>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tipo de Evento</th>
+                        <th>Direccion</th>
+                        <th>Que Registra</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Notificacion Recibida</strong></td><td>Entrante</td><td>Recepcion de notificacion de pedido (exitosa o fallida), datos del pedido, firma de seguridad</td></tr>
+                    <tr><td><strong>Orden Creada</strong></td><td>Entrante</td><td>Creacion exitosa de la orden en POS o Ventas dentro de Odoo</td></tr>
+                    <tr><td><strong>Estado Enviado</strong></td><td>Saliente</td><td>Envio de actualizacion de estado hacia el servicio de Rappi</td></tr>
+                    <tr><td><strong>Sincronizacion de Catalogo</strong></td><td>Saliente</td><td>Sincronizacion de producto o disponibilidad hacia Rappi</td></tr>
+                    <tr><td><strong>Autenticacion</strong></td><td>Saliente</td><td>Solicitud de token de acceso al servicio de Rappi</td></tr>
+                    <tr><td><strong>Error</strong></td><td>Ambas</td><td>Cualquier error en el procesamiento (con detalle completo)</td></tr>
+                    <tr><td><strong>Reintento</strong></td><td>Ambas</td><td>Reintento programado de una tarea fallida</td></tr>
+                    <tr><td><strong>Bandeja de Errores</strong></td><td>Ambas</td><td>Tarea que agoto todos los reintentos configurados</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="margin: 25px 0 15px; color: var(--secondary);">6.3 Detalle de Cada Evento</h3>
+        <p>Cada registro de evento contiene:</p>
+        <div class="feature-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <div class="feature-card">
+                <h4>Correlacion</h4>
+                <p>Identificador de Rastreo, Numero de Orden Rappi, Mapa de Orden, Configuracion de Tienda, Identificador de Tarea</p>
+            </div>
+            <div class="feature-card">
+                <h4>Comunicacion</h4>
+                <p>Metodo de envio, Direccion del servicio, Codigo de respuesta, Duracion en milisegundos</p>
+            </div>
+            <div class="feature-card">
+                <h4>Datos Transmitidos</h4>
+                <p>Encabezados de solicitud, Cuerpo de solicitud, Encabezados de respuesta, Cuerpo de respuesta</p>
+            </div>
+            <div class="feature-card">
+                <h4>Resultado</h4>
+                <p>Exito o Fallo, Mensaje de Error, Fecha y Hora</p>
+            </div>
+        </div>
+
+        <h3 style="margin: 25px 0 15px; color: var(--secondary);">6.4 Marcas de Tiempo en el Mapa de Orden</h3>
+        <p>Cada orden registra fechas y horas individuales por cada transicion de estado:</p>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Marca de Tiempo</th>
+                        <th>Se Registra Cuando</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Fecha de Creacion en Rappi</strong></td><td>Momento en que Rappi creo el pedido (dato del pedido original)</td></tr>
+                    <tr><td><strong>Fecha de Aceptacion</strong></td><td>El operador acepta el pedido</td></tr>
+                    <tr><td><strong>Fecha de Inicio de Preparacion</strong></td><td>Se inicia la preparacion del pedido</td></tr>
+                    <tr><td><strong>Fecha de Listo</strong></td><td>Pedido listo para ser recogido</td></tr>
+                    <tr><td><strong>Fecha de Despacho</strong></td><td>Pedido despachado al cliente</td></tr>
+                    <tr><td><strong>Fecha de Entrega</strong></td><td>Pedido entregado al cliente final</td></tr>
+                    <tr><td><strong>Fecha de Cancelacion</strong></td><td>Pedido cancelado</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="margin: 25px 0 15px; color: var(--secondary);">6.5 Mensajes de Seguimiento</h3>
+        <p>Las ordenes en Punto de Venta y en Ventas registran mensajes automaticos en el hilo de conversacion de Odoo para cada cambio de estado:</p>
+        <div class="highlight-box success">
+            <strong>Ejemplo de mensaje de seguimiento:</strong>
+            <em>"Orden recibida desde Rappi. Numero de Pedido: <strong>RP-2024-001234</strong>. Cliente: Juan Perez. Pago: prepagado"</em><br>
+            <em>"Estado del pedido Rappi actualizado a: <strong>Aceptado</strong>"</em><br>
+            <em>"Pedido Rappi cancelado por el operador. Motivo: Ingredientes no disponibles"</em>
+        </div>
+
+        <h3 style="margin: 25px 0 15px; color: var(--secondary);">6.6 Acciones Programadas Automaticas</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre de la Accion</th>
+                        <th>Frecuencia</th>
+                        <th>Funcion</th>
+                        <th>Activa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Rappi: Procesar Ordenes Entrantes</strong></td>
+                        <td>Cada 1 minuto</td>
+                        <td>Procesa hasta 20 tareas entrantes pendientes</td>
+                        <td>Si</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Rappi: Procesar Actualizaciones Salientes</strong></td>
+                        <td>Cada 1 minuto</td>
+                        <td>Procesa hasta 50 tareas salientes pendientes</td>
+                        <td>Si</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Rappi: Sincronizar Catalogo de Productos</strong></td>
+                        <td>Cada 30 minutos</td>
+                        <td>Sincroniza productos y disponibilidad con Rappi</td>
+                        <td>No (activacion manual)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Rappi: Limpiar Registros Antiguos</strong></td>
+                        <td>Cada 1 dia</td>
+                        <td>Elimina registros de eventos con mas de 90 dias de antiguedad</td>
+                        <td>Si</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="margin: 25px 0 15px; color: var(--secondary);">6.7 Secuencia de Identificadores</h3>
+        <p>El modulo genera una secuencia con prefijo <strong>RAPPI-</strong> y numeracion de 8 digitos para identificadores internos legibles y faciles de rastrear.</p>
+    </div>
+
+    <!-- ========== 7. REPORTES ========== -->
+    <div class="section" id="reportes">
+        <div class="section-header">
+            <div class="section-icon warm">&#128202;</div>
+            <h2>7. Detalle de Reportes <small>Vistas y analisis disponibles</small></h2>
+        </div>
+
+        <div class="highlight-box">
+            <strong>&#9888; Nota:</strong>
+            El modulo no incluye reportes impresos dedicados. Sin embargo, ofrece un conjunto completo de vistas analiticas que cumplen la funcion de reportes operativos en tiempo real.
+        </div>
+
+        <h3 style="margin: 25px 0 15px; color: var(--secondary);">7.1 Panel de Control (Dashboard)</h3>
+        <p><strong>Menu:</strong> Rappi Connector &gt; Panel de Control</p>
+        <div class="feature-grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="feature-card">
+                <h4>Vista de Tablero</h4>
+                <p>Ordenes agrupadas por estado con informacion clave: numero Rappi, cliente, total, metodo de pago, fecha y alertas (Diferencia de Precio, Error).</p>
+            </div>
+            <div class="feature-card">
+                <h4>Filtro por Defecto</h4>
+                <p>Muestra ordenes del dia actual. Soporta agrupacion por estado, tienda, tipo de orden, metodo de pago y fecha.</p>
+            </div>
+        </div>
+
+        <h3 style="margin: 25px 0 15px; color: var(--secondary);">7.2 Listados Operativos</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vista</th>
+                        <th>Menu</th>
+                        <th>Que Muestra</th>
+                        <th>Filtros Clave</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Todas las Ordenes</strong></td>
+                        <td>Ordenes &gt; Todas las Ordenes</td>
+                        <td>Todas las ordenes con indicador de color segun estado</td>
+                        <td>Pendientes, En Progreso, Entregados, Cancelados, Fallidos, Hoy, Diferencia de Precio</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ordenes Activas</strong></td>
+                        <td>Ordenes &gt; Ordenes Activas</td>
+                        <td>Solo ordenes en proceso (no terminales)</td>
+                        <td>Mismos filtros</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ordenes Pendientes</strong></td>
+                        <td>Ordenes &gt; Pendientes</td>
+                        <td>Ordenes en estado Recibido o Procesando</td>
+                        <td>&#8212;</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ordenes Fallidas</strong></td>
+                        <td>Ordenes &gt; Fallidas</td>
+                        <td>Ordenes con errores en el procesamiento</td>
+                        <td>&#8212;</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tareas Entrantes</strong></td>
+                        <td>Tareas &gt; Entrantes</td>
+                        <td>Tareas de procesamiento de ordenes que llegan desde Rappi</td>
+                        <td>Pendiente, Procesando, Completada, Fallida, Bandeja de Errores</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tareas Salientes</strong></td>
+                        <td>Tareas &gt; Salientes</td>
+                        <td>Tareas de envio de estados hacia Rappi</td>
+                        <td>Pendiente, Completada, Fallida, Bandeja de Errores, por Estado Destino</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Registro de Eventos</strong></td>
+                        <td>Monitoreo &gt; Registro de Eventos</td>
+                        <td>Historial completo de eventos con detalles de comunicacion</td>
+                        <td>Exitosos, Errores, Bandeja de Errores, Entrantes, Salientes, Hoy, Ultimas 24h</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="margin: 25px 0 15px; color: var(--secondary);">7.3 Agrupaciones Disponibles</h3>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h4>Ordenes</h4>
+                <p>Por Estado, Tienda, Tipo de Orden (POS o Venta), Metodo de Pago, Fecha</p>
+            </div>
+            <div class="feature-card">
+                <h4>Registro de Eventos</h4>
+                <p>Por Tipo de Evento, Direccion, Numero de Orden, Fecha y Hora</p>
+            </div>
+            <div class="feature-card">
+                <h4>Tareas</h4>
+                <p>Por Estado, Configuracion de Tienda, Estado Destino</p>
+            </div>
+        </div>
+
+        <h3 style="margin: 25px 0 15px; color: var(--secondary);">7.4 Filtros en Ordenes POS y de Venta</h3>
+        <p>Las vistas estandar de <strong>Ordenes en Punto de Venta</strong> y <strong>Ordenes de Venta</strong> se amplian con:</p>
+        <ul style="margin-left: 20px; color: var(--gray-700);">
+            <li>Campo de busqueda por <strong>Numero de Orden Rappi</strong></li>
+            <li>Filtro rapido <strong>"Ordenes Rappi"</strong> para mostrar solo ordenes provenientes de Rappi</li>
+            <li>Columnas opcionales: Numero de Orden Rappi, Canal de Venta</li>
+        </ul>
+    </div>
+
+    <!-- ========== 8. PREGUNTAS Y RESPUESTAS ========== -->
+    <div class="section" id="faq">
+        <div class="section-header">
+            <div class="section-icon mauve">&#10067;</div>
+            <h2>8. Preguntas y Respuestas <small>Preguntas frecuentes del modulo</small></h2>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="q-marker">Q</span>
+                Que sucede si Rappi envia el mismo pedido dos veces?
+            </div>
+            <div class="faq-answer">
+                El modulo implementa un <strong>control de duplicados</strong>. El sistema tiene una restriccion que impide crear dos registros con el mismo numero de pedido Rappi. Si el numero de pedido ya existe, se retorna el registro existente sin crear una nueva orden en Odoo.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="q-marker">Q</span>
+                Que pasa si un producto de Rappi no existe en Odoo?
+            </div>
+            <div class="faq-answer">
+                Depende de la configuracion <strong>Politica ante Producto Desconocido</strong>:<br>
+                - <strong>Crear Producto Temporal:</strong> Se crea un producto provisional con el prefijo [RAPPI] y el precio indicado en el pedido.<br>
+                - <strong>Rechazar Orden:</strong> Se rechaza la orden completa indicando que el producto no fue encontrado en el catalogo.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="q-marker">Q</span>
+                Es necesario tener una sesion de Punto de Venta abierta?
+            </div>
+            <div class="faq-answer">
+                <strong>Solo en modo Punto de Venta.</strong> Si el Modo de Orden esta configurado como "Punto de Venta", debe existir una sesion POS abierta en la configuracion seleccionada. Si no hay sesion abierta, la creacion del pedido fallara y la tarea se reintentara automaticamente. En modo "Orden de Venta" no se requiere sesion de POS.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="q-marker">Q</span>
+                Como se manejan las cancelaciones que llegan desde Rappi?
+            </div>
+            <div class="faq-answer">
+                Cuando Rappi envia una cancelacion, el modulo:<br>
+                1. Busca la orden correspondiente por su numero de pedido Rappi<br>
+                2. Si el pedido no esta en un estado final, lo marca como <em>Cancelado</em> con el motivo proporcionado, indicando que fue cancelado por Rappi<br>
+                3. Si es una orden de venta en estado activo, ejecuta la cancelacion en Odoo<br>
+                4. Registra un mensaje de seguimiento en el hilo de la orden
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="q-marker">Q</span>
+                Que ocurre cuando una tarea falla repetidamente?
+            </div>
+            <div class="faq-answer">
+                El sistema implementa <strong>reintentos con espera progresiva</strong>:<br>
+                1. Primer fallo: reintento en 1 minuto<br>
+                2. Segundo fallo: reintento en 5 minutos<br>
+                3. Tercer fallo: reintento en 15 minutos<br>
+                4. Cuarto fallo: reintento en 60 minutos (1 hora)<br>
+                5. Quinto fallo: reintento en 240 minutos (4 horas)<br><br>
+                Si agota todos los reintentos (por defecto 5), la tarea se mueve a la <strong>Bandeja de Errores</strong>. Un administrador puede forzar un reintento manual desde la vista de tareas.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="q-marker">Q</span>
+                Como se buscan los productos al recibir una orden?
+            </div>
+            <div class="faq-answer">
+                El sistema busca el producto en Odoo siguiendo esta prioridad:<br>
+                1. <strong>Identificador de Producto Rappi</strong> (campo personalizado en la ficha de producto)<br>
+                2. <strong>Referencia Interna / SKU</strong> del producto<br>
+                3. <strong>Codigo de Barras</strong> del producto<br>
+                4. <strong>Nombre del producto</strong> (busqueda parcial)<br><br>
+                Si no se encuentra por ninguno de estos metodos, se aplica la politica de productos desconocidos configurada.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="q-marker">Q</span>
+                Que indica "Diferencia de Precio" en una orden?
+            </div>
+            <div class="faq-answer">
+                Significa que el total calculado por Odoo difiere del total reportado por Rappi mas alla de la tolerancia configurada. Por ejemplo, con una tolerancia del 1%, si Rappi reporta $50,000 pero Odoo calcula $52,000, se marca como diferencia de precio. La politica configurada determina que total se usa y si se genera una alerta visual.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="q-marker">Q</span>
+                Se puede usar el modulo con multiples tiendas?
+            </div>
+            <div class="faq-answer">
+                <strong>Si.</strong> Se pueden crear multiples configuraciones de tienda, cada una con su propio identificador de tienda, credenciales de conexion y configuracion de ordenes. La notificacion entrante identifica la tienda por el identificador enviado por Rappi. Tambien soporta multi-compania con reglas de acceso por empresa.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="q-marker">Q</span>
+                Como se protege la comunicacion contra accesos no autorizados?
+            </div>
+            <div class="faq-answer">
+                El modulo implementa una validacion de <strong>firma digital de seguridad</strong>. Rappi firma cada mensaje con el secreto compartido y envia la firma en el encabezado del mensaje. El modulo recalcula la firma con el secreto configurado y la compara de forma segura. Si la firma no coincide, se rechaza el mensaje y se registra el intento fallido en el historial de eventos.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="q-marker">Q</span>
+                Se pueden cancelar o rechazar ordenes directamente desde Odoo?
+            </div>
+            <div class="faq-answer">
+                <strong>Si.</strong> Tanto en las ordenes de Punto de Venta como en las de Ventas, aparecen botones de <strong>"Cancelar Rappi"</strong> y <strong>"Rechazar"</strong> (visibles segun el estado actual). Al presionarlos, se abre un asistente que solicita obligatoriamente un motivo y un codigo de razon. La cancelacion o rechazo se notifica automaticamente a Rappi mediante una tarea saliente.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="q-marker">Q</span>
+                Como se sincronizan los productos y el inventario hacia Rappi?
+            </div>
+            <div class="faq-answer">
+                1. Marcar los productos con <strong>"Disponible en Rappi"</strong> y asignar el <strong>Identificador de Producto Rappi</strong><br>
+                2. Activar <strong>"Habilitar Sincronizacion de Catalogo"</strong> en la configuracion de la tienda<br>
+                3. La accion programada se ejecuta cada 30 minutos (debe activarse manualmente la primera vez)<br>
+                4. Se sincronizan nombre, precio, categoria, disponibilidad e imagen del producto<br>
+                5. La disponibilidad se calcula automaticamente: si la cantidad disponible es igual o menor al umbral configurado, el producto se marca como agotado en Rappi
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="q-marker">Q</span>
+                Los registros de eventos se limpian automaticamente?
+            </div>
+            <div class="faq-answer">
+                <strong>Si.</strong> La accion programada <em>"Rappi: Limpiar Registros Antiguos"</em> se ejecuta diariamente y elimina todos los registros de eventos con mas de <strong>90 dias</strong> de antiguedad. Esto previene el crecimiento excesivo de la base de datos.
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ===================== FOOTER ===================== -->
+<div class="footer">
+    <div class="company-name">COONDEV</div>
+    <div class="tagline">Coonsulting &amp; Development</div>
+    <div class="footer-divider"></div>
+    <p>Guia Funcional - Rappi Connector</p>
+    <p>Ecosistema: <strong>Rappi Connector</strong> | Odoo 18 Enterprise</p>
+    <p style="margin-top: 15px; font-size: 12px; opacity: 0.7;">Documento generado &bull; Febrero 2026</p>
+</div>
+
+</body>
+</html>
