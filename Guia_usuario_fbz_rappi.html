@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía Funcional - FBZ Rappi Connector v18</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --primary: #FF6B00;
+            --primary-dark: #E55D00;
+            --primary-light: #FFF3E8;
+            --dark: #1A1A2E;
+            --dark-2: #16213E;
+            --dark-3: #0F3460;
+            --text: #2D3748;
+            --text-light: #718096;
+            --bg: #F7F8FC;
+            --white: #FFFFFF;
+            --border: #E2E8F0;
+            --success: #38A169;
+            --warning: #D69E2E;
+            --danger: #E53E3E;
+            --info: #3182CE;
+            --sidebar-width: 280px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            font-size: 15px;
+        }
+
+        /* ─── SIDEBAR ─── */
+        .sidebar {
+            position: fixed;
+            top: 0; left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: linear-gradient(180deg, var(--dark) 0%, var(--dark-2) 100%);
+            color: #CBD5E0;
+            overflow-y: auto;
+            z-index: 100;
+            padding-bottom: 30px;
+        }
+
+        .sidebar-header {
+            padding: 28px 24px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            text-align: center;
+        }
+
+        .sidebar-logo {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--white);
+            letter-spacing: 1.5px;
+        }
+
+        .sidebar-logo span { color: var(--primary); }
+
+        .sidebar-subtitle {
+            font-size: 11px;
+            color: #718096;
+            margin-top: 4px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .sidebar-section {
+            padding: 18px 20px 6px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #4A5568;
+            font-weight: 700;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 24px;
+            color: #A0AEC0;
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 400;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar a:hover {
+            background: rgba(255,107,0,0.08);
+            color: var(--white);
+            border-left-color: var(--primary);
+        }
+
+        .sidebar a .icon {
+            width: 18px;
+            text-align: center;
+            font-size: 13px;
+            opacity: 0.7;
+        }
+
+        /* ─── MAIN CONTENT ─── */
+        .main {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+        }
+
+        /* ─── HERO ─── */
+        .hero {
+            background: linear-gradient(135deg, var(--dark) 0%, var(--dark-3) 60%, var(--primary-dark) 100%);
+            color: var(--white);
+            padding: 60px 50px 50px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: -50%; right: -20%;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(255,107,0,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255,107,0,0.2);
+            color: var(--primary);
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .hero h1 {
+            font-size: 34px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 span { color: var(--primary); }
+
+        .hero p {
+            font-size: 16px;
+            color: #CBD5E0;
+            max-width: 650px;
+            line-height: 1.8;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-meta {
+            display: flex;
+            gap: 28px;
+            margin-top: 25px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #A0AEC0;
+        }
+
+        .hero-meta-item strong {
+            color: var(--white);
+        }
+
+        /* ─── CONTENT ─── */
+        .content {
+            padding: 40px 50px 80px;
+            max-width: 960px;
+        }
+
+        /* ─── SECTIONS ─── */
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section-anchor {
+            display: block;
+            position: relative;
+            top: -30px;
+            visibility: hidden;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 8px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .section-title .num {
+            background: var(--primary);
+            color: var(--white);
+            width: 34px; height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .section > p {
+            color: var(--text-light);
+            margin-bottom: 20px;
+            font-size: 14.5px;
+        }
+
+        /* ─── CARDS ─── */
+        .card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 24px 28px;
+            margin-bottom: 18px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title .dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            flex-shrink: 0;
+        }
+
+        /* ─── STEP LIST ─── */
+        .steps {
+            counter-reset: step;
+            list-style: none;
+            padding: 0;
+        }
+
+        .steps li {
+            counter-increment: step;
+            padding: 14px 18px 14px 58px;
+            position: relative;
+            margin-bottom: 10px;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14.5px;
+            line-height: 1.6;
+        }
+
+        .steps li::before {
+            content: counter(step);
+            position: absolute;
+            left: 16px; top: 14px;
+            width: 28px; height: 28px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 50%;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .steps li strong { color: var(--dark); }
+
+        .steps li code {
+            background: #EDF2F7;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: var(--primary-dark);
+            font-family: 'Courier New', monospace;
+        }
+
+        /* ─── INFO BOXES ─── */
+        .info-box {
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin: 16px 0;
+            font-size: 14px;
+            line-height: 1.7;
+            display: flex;
+            gap: 12px;
+        }
+
+        .info-box .ib-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+        .info-box.tip {
+            background: #F0FFF4;
+            border: 1px solid #C6F6D5;
+            color: #276749;
+        }
+
+        .info-box.warning {
+            background: #FFFBEB;
+            border: 1px solid #FDE68A;
+            color: #92400E;
+        }
+
+        .info-box.danger {
+            background: #FFF5F5;
+            border: 1px solid #FED7D7;
+            color: #9B2C2C;
+        }
+
+        .info-box.note {
+            background: #EBF8FF;
+            border: 1px solid #BEE3F8;
+            color: #2A4365;
+        }
+
+        /* ─── TABLES ─── */
+        .table-wrap {
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            background: var(--white);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        thead th {
+            background: var(--dark);
+            color: var(--white);
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody td {
+            padding: 11px 16px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        tbody tr:last-child td { border-bottom: none; }
+
+        tbody tr:nth-child(even) { background: #FAFBFC; }
+
+        td code {
+            background: #EDF2F7;
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-size: 13px;
+            color: var(--primary-dark);
+        }
+
+        /* ─── TAGS ─── */
+        .tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11.5px;
+            font-weight: 600;
+        }
+
+        .tag.orange { background: #FFF3E8; color: var(--primary); }
+        .tag.green { background: #F0FFF4; color: #38A169; }
+        .tag.blue { background: #EBF8FF; color: #3182CE; }
+        .tag.red { background: #FFF5F5; color: #E53E3E; }
+        .tag.gray { background: #EDF2F7; color: #4A5568; }
+
+        /* ─── FLOW DIAGRAM ─── */
+        .flow {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .flow-item {
+            background: var(--white);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 20px;
+            text-align: center;
+            min-width: 130px;
+        }
+
+        .flow-item.active {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .flow-item .fi-icon { font-size: 22px; margin-bottom: 4px; }
+        .flow-item .fi-label { font-size: 12px; font-weight: 600; color: var(--dark); }
+        .flow-item .fi-desc { font-size: 11px; color: var(--text-light); }
+
+        .flow-arrow {
+            font-size: 20px;
+            color: var(--primary);
+            padding: 0 6px;
+            font-weight: 700;
+        }
+
+        /* ─── KEY VALUE ─── */
+        .kv-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .kv-item {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 18px;
+        }
+
+        .kv-item .kv-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-light);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .kv-item .kv-value {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        /* ─── CODE BLOCK ─── */
+        .code-block {
+            background: #1A202C;
+            color: #E2E8F0;
+            padding: 18px 22px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            overflow-x: auto;
+            margin: 14px 0;
+        }
+
+        .code-block .comment { color: #718096; }
+        .code-block .keyword { color: #F6AD55; }
+        .code-block .string { color: #68D391; }
+
+        /* ─── FOOTER ─── */
+        .footer {
+            background: var(--dark);
+            color: #718096;
+            padding: 30px 50px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .footer strong { color: var(--primary); }
+
+        /* ─── SUB-STEPS ─── */
+        .sub-steps {
+            margin-top: 8px;
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .sub-steps li {
+            padding: 4px 0 4px 20px;
+            position: relative;
+            margin-bottom: 0;
+            background: none;
+            border: none;
+            font-size: 13.5px;
+            counter-increment: none;
+        }
+
+        .sub-steps li::before {
+            content: '→';
+            position: absolute;
+            left: 0; top: 4px;
+            width: auto; height: auto;
+            background: none;
+            color: var(--primary);
+            border-radius: 0;
+            font-size: 13px;
+            font-weight: 700;
+            display: inline;
+        }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 900px) {
+            .sidebar { display: none; }
+            .main { margin-left: 0; }
+            .hero { padding: 40px 24px 35px; }
+            .hero h1 { font-size: 26px; }
+            .content { padding: 28px 24px 60px; }
+            .hero-meta { flex-direction: column; gap: 10px; }
+            .kv-grid { grid-template-columns: 1fr; }
+            .flow { flex-direction: column; }
+            .flow-arrow { transform: rotate(90deg); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════ -->
+<!-- SIDEBAR                                          -->
+<!-- ════════════════════════════════════════════════ -->
+<nav class="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-logo">COON<span>DEV</span></div>
+        <div class="sidebar-subtitle">Guía Funcional</div>
+    </div>
+
+    <div class="sidebar-section">Inicio</div>
+    <a href="#intro"><span class="icon">📋</span> Descripción General</a>
+    <a href="#requisitos"><span class="icon">✅</span> Requisitos Previos</a>
+
+    <div class="sidebar-section">Configuración</div>
+    <a href="#instalacion"><span class="icon">📦</span> Instalación</a>
+    <a href="#config-rappi"><span class="icon">⚙️</span> Configurar Conexión</a>
+    <a href="#config-pos"><span class="icon">🖥️</span> Configurar POS</a>
+
+    <div class="sidebar-section">Operación</div>
+    <a href="#pull-orders"><span class="icon">📥</span> Recibir Pedidos</a>
+    <a href="#pull-products"><span class="icon">📥</span> Traer Productos</a>
+    <a href="#push-products"><span class="icon">📤</span> Enviar Productos</a>
+    <a href="#webhook"><span class="icon">🔔</span> Webhook Automático</a>
+
+    <div class="sidebar-section">Flujos</div>
+    <a href="#flujo-orden"><span class="icon">🔄</span> Ciclo de una Orden</a>
+    <a href="#cocina"><span class="icon">🍳</span> Cocina / KDS</a>
+    <a href="#crons"><span class="icon">⏰</span> Tareas Automáticas</a>
+
+    <div class="sidebar-section">Referencia</div>
+    <a href="#modelos"><span class="icon">🗄️</span> Modelos Técnicos</a>
+    <a href="#seguridad"><span class="icon">🔐</span> Seguridad</a>
+    <a href="#faq"><span class="icon">❓</span> Preguntas Frecuentes</a>
+</nav>
+
+<!-- ════════════════════════════════════════════════ -->
+<!-- MAIN CONTENT                                     -->
+<!-- ════════════════════════════════════════════════ -->
+<div class="main">
+
+    <!-- HERO -->
+    <div class="hero">
+        <div class="hero-badge">MÓDULO ODOO 18</div>
+        <h1>FBZ <span>Rappi</span> Connector v18</h1>
+        <p>Integración completa entre Odoo 18 y la plataforma Rappi. Recibe pedidos automáticamente, sincroniza productos y gestiona todo desde el Punto de Venta y la Cocina (KDS).</p>
+        <div class="hero-meta">
+            <div class="hero-meta-item">
+                <strong>Versión</strong> 18.0.1.0
+            </div>
+            <div class="hero-meta-item">
+                <strong>Autor</strong> Coondev
+            </div>
+            <div class="hero-meta-item">
+                <strong>Categoría</strong> Ventas / Integración
+            </div>
+            <div class="hero-meta-item">
+                <strong>Licencia</strong> Propietaria
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+        <!-- ╔══════════════════════════════════════╗ -->
+        <!-- ║ 1. DESCRIPCIÓN GENERAL               ║ -->
+        <!-- ╚══════════════════════════════════════╝ -->
+        <div class="section" id="intro">
+            <span class="section-anchor"></span>
+            <div class="section-title">
+                <span class="num">1</span>
+                Descripción General
+            </div>
+            <p>Este módulo conecta tu sistema Odoo con la plataforma de delivery <strong>Rappi</strong>. Permite recibir pedidos, sincronizar tu catálogo de productos y gestionar todo el ciclo de vida de las órdenes sin salir de Odoo.</p>
+
+            <div class="kv-grid">
+                <div class="kv-item">
+                    <div class="kv-label">¿Qué es Odoo?</div>
+                    <div class="kv-value">Es un software para administrar negocios: ventas, inventario, punto de venta, contabilidad y más. Todo desde un navegador web.</div>
+                </div>
+                <div class="kv-item">
+                    <div class="kv-label">¿Qué es Rappi?</div>
+                    <div class="kv-value">Es una plataforma de delivery donde los clientes piden comida y productos. Este módulo conecta tu tienda de Rappi con Odoo.</div>
+                </div>
+                <div class="kv-item">
+                    <div class="kv-label">¿Qué hace este módulo?</div>
+                    <div class="kv-value">Trae pedidos de Rappi a Odoo automáticamente, los envía al POS y a la cocina, y permite sincronizar tu menú.</div>
+                </div>
+                <div class="kv-item">
+                    <div class="kv-label">¿Para quién es?</div>
+                    <div class="kv-value">Restaurantes y negocios de comida que usan Rappi como canal de venta y quieren gestionar todo desde un solo lugar.</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="dot"></span> Funcionalidades principales</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Funcionalidad</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="tag orange">Pull Orders</span></td>
+                                <td>Descarga los pedidos de Rappi y crea automáticamente órdenes en Ventas y en el Punto de Venta (POS).</td>
+                            </tr>
+                            <tr>
+                                <td><span class="tag blue">Pull Products</span></td>
+                                <td>Descarga <strong>todos</strong> los productos del menú de tu tienda en Rappi y los crea en Odoo si no existen.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="tag green">Push Products</span></td>
+                                <td>Envía los productos de Odoo hacia Rappi para actualizar tu menú (filtra solo los que están listos para venta).</td>
+                            </tr>
+                            <tr>
+                                <td><span class="tag orange">Webhook</span></td>
+                                <td>Recibe notificaciones en tiempo real desde Rappi cuando llega un nuevo pedido, sin necesidad de consultar manualmente.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="tag blue">Kitchen Display (KDS)</span></td>
+                                <td>Los pedidos de Rappi aparecen en la Pantalla de Cocina. Al terminar de preparar, la orden se cierra y paga automáticamente.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="tag green">Tareas Automáticas</span></td>
+                                <td>El módulo renueva tokens y descarga pedidos automáticamente mediante tareas programadas (cron).</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ╔══════════════════════════════════════╗ -->
+        <!-- ║ 2. REQUISITOS PREVIOS                ║ -->
+        <!-- ╚══════════════════════════════════════╝ -->
+        <div class="section" id="requisitos">
+            <span class="section-anchor"></span>
+            <div class="section-title">
+                <span class="num">2</span>
+                Requisitos Previos
+            </div>
+            <p>Antes de instalar el módulo, verifica que tengas lo siguiente disponible:</p>
+
+            <div class="card">
+                <div class="card-title"><span class="dot"></span> En Odoo</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Módulo Requerido</th>
+                                <th>Nombre Técnico</th>
+                                <th>¿Para qué?</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Ventas</td><td><code>sale_management</code></td><td>Crear órdenes de venta a partir de los pedidos de Rappi.</td></tr>
+                            <tr><td>Productos</td><td><code>product</code></td><td>Gestionar el catálogo de productos que se sincronizan con Rappi.</td></tr>
+                            <tr><td>Inventario</td><td><code>stock</code></td><td>Control de existencias de los productos vendidos.</td></tr>
+                            <tr><td>Punto de Venta</td><td><code>point_of_sale</code></td><td>Crear órdenes de POS para los pedidos del restaurante.</td></tr>
+                            <tr><td>Pantalla de Preparación</td><td><code>pos_preparation_display</code></td><td>Mostrar los pedidos de Rappi en la pantalla de cocina (KDS).</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="dot"></span> En Rappi</div>
+                <p style="font-size:14px; color: var(--text-light); margin-bottom: 12px;">Necesitas tener una cuenta de integraciones activa en el <strong>Portal de Desarrolladores de Rappi</strong>. De allí obtendrás:</p>
+                <div class="kv-grid">
+                    <div class="kv-item">
+                        <div class="kv-label">Client ID</div>
+                        <div class="kv-value">Identificador de tu aplicación en el portal de Rappi.</div>
+                    </div>
+                    <div class="kv-item">
+                        <div class="kv-label">Client Secret</div>
+                        <div class="kv-value">Clave secreta que se usa para obtener tokens de autenticación.</div>
+                    </div>
+                    <div class="kv-item">
+                        <div class="kv-label">Store ID</div>
+                        <div class="kv-value">Identificador único de tu tienda/restaurante dentro de Rappi.</div>
+                    </div>
+                    <div class="kv-item">
+                        <div class="kv-label">Webhook Secret (opcional)</div>
+                        <div class="kv-value">Clave para validar que las notificaciones realmente vienen de Rappi.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box tip">
+                <span class="ib-icon">💡</span>
+                <div><strong>Consejo:</strong> Si aún no tienes credenciales de Rappi, puedes usar el entorno <strong>Sandbox</strong> para pruebas. Las URLs se configuran automáticamente al seleccionar el entorno.</div>
+            </div>
+        </div>
+
+        <!-- ╔══════════════════════════════════════╗ -->
+        <!-- ║ 3. INSTALACIÓN                       ║ -->
+        <!-- ╚══════════════════════════════════════╝ -->
+        <div class="section" id="instalacion">
+            <span class="section-anchor"></span>
+            <div class="section-title">
+                <span class="num">3</span>
+                Instalación del Módulo
+            </div>
+            <p>Sigue estos pasos para instalar el conector de Rappi en tu sistema Odoo:</p>
+
+            <ol class="steps">
+                <li>Inicia sesión en tu sistema Odoo con un usuario <strong>Administrador</strong>.</li>
+                <li>Ve al menú principal y haz clic en <strong>Aplicaciones</strong> (icono de cuadrícula en la barra superior).</li>
+                <li>En la barra de búsqueda, escribe <code>FBZ Rappi Connector</code> o <code>rappi</code>.</li>
+                <li>Localiza el módulo <strong>"FBZ Rappi Connector v18"</strong> en los resultados. Verás el autor <em>Coondev</em>.</li>
+                <li>Haz clic en el botón <strong>Instalar</strong> (o <strong>Activar</strong> si ya fue descargado).</li>
+                <li>Espera a que Odoo termine la instalación. Aparecerá un nuevo menú llamado <strong>"Rappi"</strong> en la barra superior.</li>
+            </ol>
+
+            <div class="info-box warning">
+                <span class="ib-icon">⚠️</span>
+                <div><strong>Importante:</strong> Si no ves el módulo en la lista, asegúrate de que la carpeta <code>fbz_rappi_connector_v18</code> esté dentro del directorio de addons de Odoo y que hayas actualizado la lista de aplicaciones (<em>Aplicaciones → Actualizar lista de aplicaciones</em>).</div>
+            </div>
+        </div>
+
+        <!-- ╔══════════════════════════════════════╗ -->
+        <!-- ║ 4. CONFIGURAR CONEXIÓN RAPPI         ║ -->
+        <!-- ╚══════════════════════════════════════╝ -->
+        <div class="section" id="config-rappi">
+            <span class="section-anchor"></span>
+            <div class="section-title">
+                <span class="num">4</span>
+                Configurar la Conexión con Rappi
+            </div>
+            <p>Esta es la parte más importante. Aquí conectas tu Odoo con tu tienda de Rappi.</p>
+
+            <ol class="steps">
+                <li>En la barra superior, haz clic en el menú <strong>Rappi</strong>.</li>
+                <li>Haz clic en <strong>Configuration</strong> (Configuración). Se abrirá la lista de conexiones.</li>
+                <li>Haz clic en <strong>Nuevo</strong> para crear una configuración nueva.</li>
+                <li>
+                    Rellena los campos de <strong>Conexión API</strong>:
+                    <ul class="sub-steps">
+                        <li><strong>Entorno:</strong> Selecciona <code>Sandbox</code> para pruebas o <code>Production</code> para tu tienda real.</li>
+                        <li><strong>Base URL:</strong> Se completa automáticamente según el entorno. No la cambies salvo que Rappi te indique otra.</li>
+                        <li><strong>Audience:</strong> Se completa automáticamente. Es la URL del API de Rappi.</li>
+                        <li><strong>Token URL:</strong> Se completa automáticamente. Es la URL de Auth0 para obtener tokens.</li>
+                        <li><strong>Store Name:</strong> El nombre de tu tienda/restaurante (ejemplo: "Mi Restaurante Centro").</li>
+                        <li><strong>Store ID:</strong> El identificador numérico que te dio Rappi.</li>
+                        <li><strong>Client ID:</strong> El identificador de tu aplicación del portal de Rappi.</li>
+                        <li><strong>Client Secret:</strong> La clave secreta del portal de Rappi.</li>
+                        <li><strong>Webhook Secret:</strong> (Opcional) Clave para verificar notificaciones automáticas.</li>
+                    </ul>
+                </li>
+                <li>Haz clic en el botón <strong>Refresh Token</strong> para obtener tu primer token de autenticación.</li>
+                <li>Haz clic en <strong>Test Connection</strong> para verificar que todo funciona correctamente. Deberías ver un mensaje <em>"Conexión exitosa ✅"</em>.</li>
+                <li>Haz clic en <strong>Guardar</strong> (icono de disquete o nube arriba a la izquierda).</li>
+            </ol>
+
+            <div class="card">
+                <div class="card-title"><span class="dot"></span> Campos de conexión - Referencia rápida</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Campo</th>
+                                <th>Ejemplo (Sandbox)</th>
+                                <th>Ejemplo (Producción)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Base URL</strong></td>
+                                <td><code>https://microservices.dev.rappi.com/api/v2/restaurants-integrations-public-api</code></td>
+                                <td><code>https://microservices.rappi.com/api/v2/restaurants-integrations-public-api</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Token URL</strong></td>
+                                <td><code>https://rests-integrations-dev.auth0.com/oauth/token</code></td>
+                                <td><code>https://rests-integrations.auth0.com/oauth/token</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Audience</strong></td>
+                                <td colspan="2">Igual que la Base URL de tu entorno</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="info-box tip">
+                <span class="ib-icon">💡</span>
+                <div><strong>Truco:</strong> Al seleccionar el <strong>Entorno</strong> (Sandbox o Production), las URLs se rellenan automáticamente si los campos están vacíos. Solo necesitas poner tu <em>Client ID</em>, <em>Client Secret</em> y <em>Store ID</em>.</div>
+            </div>
+        </div>
+
+        <!-- ╔══════════════════════════════════════╗ -->
+        <!-- ║ 5. CONFIGURAR POS                    ║ -->
+        <!-- ╚══════════════════════════════════════╝ -->
+        <div class="section" id="config-pos">
+            <span class="section-anchor"></span>
+            <div class="section-title">
+                <span class="num">5</span>
+                Configurar el Punto de Venta (POS)
+            </div>
+            <p>Para que los pedidos de Rappi lleguen directamente a tu Punto de Venta y a la cocina, configura estos campos adicionales.</p>
+
+            <ol class="steps">
+                <li>En la pantalla de configuración de Rappi (la misma del paso anterior), busca la sección <strong>"Routing &amp; Pricing"</strong>.</li>
+                <li>
+                    Configura los siguientes campos:
+                    <ul class="sub-steps">
+                        <li><strong>Target POS:</strong> Selecciona el Punto de Venta donde aparecerán los pedidos de Rappi (ejemplo: "Restaurante Principal").</li>
+                        <li><strong>Método de pago Rappi:</strong> Selecciona o crea un método de pago llamado "Rappi" para que las órdenes se cierren automáticamente con ese método.</li>
+                        <li><strong>Equipo de Ventas:</strong> (Opcional) Equipo de ventas al que se asignarán las órdenes de venta.</li>
+                        <li><strong>Lista de Precios:</strong> (Opcional) Si tienes precios especiales para Rappi, selecciona la tarifa correspondiente.</li>
+                        <li><strong>Ubicación de Stock:</strong> (Opcional) Almacén/ubicación de donde se descontará el inventario.</li>
+                    </ul>
+                </li>
+                <li>Haz clic en <strong>Guardar</strong>.</li>
+            </ol>
+
+            <div class="info-box danger">
+                <span class="ib-icon">🔴</span>
+                <div><strong>Obligatorio:</strong> Para que las órdenes se cierren y paguen automáticamente desde la cocina, <strong>debes</strong> configurar el campo <em>"Método de pago Rappi"</em>. Sin este campo, el sistema no podrá marcar las órdenes como pagadas.</div>
+            </div>
+
+            <div class="info-box note">
+                <span class="ib-icon">📌</span>
+                <div><strong>Requisito del POS:</strong> El Punto de Venta seleccionado debe tener una <strong>sesión abierta</strong> para poder recibir pedidos. Si la sesión está cerrada, el módulo mostrará un error indicándote que la abras.</div>
+            </div>
+        </div>
+
+        <!-- ╔══════════════════════════════════════╗ -->
+        <!-- ║ 6. RECIBIR PEDIDOS (PULL ORDERS)     ║ -->
+        <!-- ╚══════════════════════════════════════╝ -->
+        <div class="section" id="pull-orders">
+            <span class="section-anchor"></span>
+            <div class="section-title">
+                <span class="num">6</span>
+                Recibir Pedidos de Rappi (Pull Orders)
+            </div>
+            <p>Esta función descarga los pedidos de tu tienda de Rappi y los crea automáticamente en Odoo.</p>
+
+            <div class="card">
+                <div class="card-title"><span class="dot"></span> Método manual</div>
+                <ol class="steps">
+                    <li>Ve a <strong>Rappi → Configuration</strong> y abre tu configuración.</li>
+                    <li>Haz clic en el botón <strong>"Pull Orders"</strong>.</li>
+                    <li>Espera unos segundos. Verás una notificación indicando cuántos pedidos se procesaron.</li>
+                </ol>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="dot"></span> ¿Qué ocurre internamente?</div>
+                <p style="font-size: 14px; color: var(--text-light);">Al hacer Pull Orders, el módulo:</p>
+                <ol class="steps">
+                    <li>Se conecta a la API de Rappi y descarga todos los pedidos disponibles.</li>
+                    <li>Por cada pedido, crea o actualiza un registro <strong>rappi.order</strong> con el payload completo.</li>
+                    <li>Crea automáticamente una <strong>Orden de Venta</strong> (<em>sale.order</em>) con las líneas de productos.</li>
+                    <li>Si tienes un <strong>POS configurado</strong>, también crea una orden en el <strong>Punto de Venta</strong> con mesa asignada en el piso "Rappi".</li>
+                    <li>Envía la orden a la <strong>Pantalla de Cocina (KDS)</strong> para que el equipo de preparación la vea.</li>
+                    <li>Si el producto no existe en Odoo, lo <strong>crea automáticamente</strong> como producto de tipo servicio.</li>
+                </ol>
+            </div>
+
+            <div class="info-box tip">
+                <span class="ib-icon">💡</span>
+                <div><strong>Automático:</strong> No necesitas hacer esto manualmente. El sistema descarga pedidos cada <strong>5 minutos</strong> de forma automática. Ver la sección de <a href="#crons">Tareas Automáticas</a>.</div>
+            </div>
+        </div>
+
+        <!-- ╔══════════════════════════════════════╗ -->
+        <!-- ║ 7. TRAER PRODUCTOS (PULL PRODUCTS)   ║ -->
+        <!-- ╚══════════════════════════════════════╝ -->
+        <div class="section" id="pull-products">
+            <span class="section-anchor"></span>
+            <div class="section-title">
+                <span class="num">7</span>
+                Traer Productos de Rappi (Pull Products)
+            </div>
+            <p>Esta función descarga <strong>todos</strong> los productos del menú actual de tu tienda en Rappi y los crea en Odoo si no existen.</p>
+
+            <ol class="steps">
+                <li>Ve a <strong>Rappi → Configuration</strong> y abre tu configuración.</li>
+                <li>Haz clic en el botón <strong>"Pull Product"</strong>.</li>
+                <li>El sistema se conecta a Rappi y consulta el menú completo de tu tienda (endpoint <code>/store/{store_id}/menu/current</code>).</li>
+                <li>
+                    Por cada producto del menú de Rappi:
+                    <ul class="sub-steps">
+                        <li>Busca si ya existe en Odoo por su <strong>SKU</strong> (código interno) o por su <strong>Rappi SKU</strong>.</li>
+                        <li>Si <strong>no existe</strong>, lo crea como producto almacenable (<em>storable</em>) con el nombre, precio, SKU y Rappi Item ID.</li>
+                        <li>Si <strong>ya existe</strong>, lo omite (no lo duplica).</li>
+                    </ul>
+                </li>
+                <li>Verás una notificación indicando cuántos productos nuevos se crearon.</li>
+            </ol>
+
+            <div class="info-box note">
+                <span class="ib-icon">📌</span>
+                <div><strong>Sin filtros:</strong> El Pull Products trae <strong>todos</strong> los productos del menú de Rappi, sin excepción. Si un producto ya existe en Odoo (mismo SKU), simplemente se ignora para evitar duplicados.</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="dot"></span> Datos que se sincronizan por producto</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Dato en Rappi</th>
+                                <th>Campo en Odoo</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>name</code></td><td>Nombre del producto</td><td>Nombre visible del producto.</td></tr>
+                            <tr><td><code>price</code></td><td>Precio de venta</td><td>Precio público del producto.</td></tr>
+                            <tr><td><code>partnerSku</code></td><td>Referencia interna + Rappi SKU</td><td>Código que identifica al producto en ambos sistemas.</td></tr>
+                            <tr><td><code>id</code></td><td>Rappi Item ID</td><td>Identificador interno de Rappi para ese ítem del menú.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ╔══════════════════════════════════════╗ -->
+        <!-- ║ 8. ENVIAR PRODUCTOS (PUSH PRODUCTS)  ║ -->
+        <!-- ╚══════════════════════════════════════╝ -->
+        <div class="section" id="push-products">
+            <span class="section-anchor"></span>
+            <div class="section-title">
+                <span class="num">8</span>
+                Enviar Productos a Rappi (Push Products)
+            </div>
+            <p>Esta función envía tu catálogo de productos desde Odoo hacia Rappi para actualizar el menú de tu tienda. <strong>A diferencia del Pull, aquí sí se aplican filtros</strong> para enviar solo productos listos.</p>
+
+            <ol class="steps">
+                <li>Ve a <strong>Rappi → Configuration</strong> y abre tu configuración.</li>
+                <li>Haz clic en el botón <strong>"Push Product"</strong>.</li>
+                <li>El sistema busca productos que cumplan <strong>todos</strong> estos criterios:
+                    <ul class="sub-steps">
+                        <li><strong>Puede venderse</strong> (<em>sale_ok = true</em>) → El checkbox "Puede venderse" debe estar activado en la ficha del producto.</li>
+                        <li><strong>Disponible en POS</strong> (<em>available_in_pos = true</em>) → El producto debe estar habilitado para el Punto de Venta.</li>
+                        <li><strong>Precio mayor a 0</strong> → No se envían productos sin precio.</li>
+                        <li><strong>Tiene SKU</strong> → El producto debe tener un <em>Rappi SKU</em> o una <em>Referencia Interna</em> (código).</li>
+                    </ul>
+                </li>
+                <li>Los productos se agrupan por <strong>categoría</strong> para estructurar el menú en Rappi.</li>
+                <li>Se envían al endpoint <code>POST /menu</code> de Rappi.</li>
+                <li>Verás una notificación indicando cuántos productos se enviaron (y cuántos se omitieron si no cumplían los requisitos).</li>
+            </ol>
+
+            <div class="info-box warning">
+                <span class="ib-icon">⚠️</span>
+                <div>
+                    <strong>Requisitos mínimos de Rappi:</strong>
+                    <ul style="margin-top:6px; padding-left:18px;">
+                        <li>El nombre del producto debe tener <strong>mínimo 3 caracteres</strong>.</li>
+                        <li>La descripción de venta debe tener <strong>mínimo 3 caracteres</strong>.</li>
+                        <li>Los productos que no cumplan se omiten automáticamente.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="dot"></span> Comparación Pull vs Push de Productos</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Característica</th>
+                                <th>Pull Product (Rappi → Odoo)</th>
+                                <th>Push Product (Odoo → Rappi)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>Dirección</strong></td><td>Descarga de Rappi a Odoo</td><td>Envía de Odoo a Rappi</td></tr>
+                            <tr><td><strong>Filtros</strong></td><td><span class="tag green">Sin filtro</span> — Trae todos</td><td><span class="tag orange">Con filtros</span> — Solo los listos</td></tr>
+                            <tr><td><strong>Productos nuevos</strong></td><td>Crea en Odoo si no existe</td><td>Actualiza menú en Rappi</td></tr>
+                            <tr><td><strong>Duplicados</strong></td><td>Se omiten (mismo SKU)</td><td>Se envían todos los válidos</td></tr>
+                            <tr><td><strong>Tipo creado</strong></td><td>Almacenable (storable)</td><td>N/A (no crea en Rappi)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ╔══════════════════════════════════════╗ -->
+        <!-- ║ 9. WEBHOOK                           ║ -->
+        <!-- ╚══════════════════════════════════════╝ -->
+        <div class="section" id="webhook">
+            <span class="section-anchor"></span>
+            <div class="section-title">
+                <span class="num">9</span>
+                Webhook — Recepción Automática en Tiempo Real
+            </div>
+            <p>El webhook permite que Rappi notifique a tu Odoo <strong>instantáneamente</strong> cuando llega un nuevo pedido, sin esperar al cron de 5 minutos.</p>
+
+            <div class="card">
+                <div class="card-title"><span class="dot"></span> Configurar el Webhook</div>
+                <ol class="steps">
+                    <li>En el portal de desarrolladores de Rappi, busca la sección de <strong>Webhooks</strong>.</li>
+                    <li>
+                        Configura la URL del webhook con la dirección de tu servidor Odoo:
+                        <div class="code-block">
+                            <span class="keyword">URL:</span> <span class="string">https://tu-dominio.com/rappi/webhook</span>
+                            <br><span class="keyword">Método:</span> POST
+                            <br><span class="keyword">Content-Type:</span> application/json
+                        </div>
+                    </li>
+                    <li>(Opcional) Si Rappi te proporciona un <strong>Webhook Secret</strong>, ingrésalo en el campo correspondiente de la configuración de Rappi en Odoo para validar la firma de cada mensaje.</li>
+                </ol>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="dot"></span> ¿Cómo funciona?</div>
+                <ol class="steps">
+                    <li>Un cliente hace un pedido en Rappi.</li>
+                    <li>Rappi envía un mensaje (JSON) a <code>https://tu-dominio.com/rappi/webhook</code>.</li>
+                    <li>El módulo identifica la tienda por el <code>storeId</code> del mensaje.</li>
+                    <li>Si hay <strong>Webhook Secret</strong>, verifica la firma HMAC-SHA256 para asegurar que es auténtico.</li>
+                    <li>Procesa el pedido igual que si hubieras hecho "Pull Orders" manualmente.</li>
+                </ol>
+            </div>
+
+            <div class="info-box note">
+                <span class="ib-icon">📌</span>
+                <div><strong>Eventos soportados:</strong> El webhook responde a eventos de tipo <code>PING</code> / <code>HEALTH_CHECK</code> (para verificar que el servidor está activo) y a eventos que contengan datos de <code>order</code> u <code>orders</code>.</div>
+            </div>
+        </div>
+
+        <!-- ╔══════════════════════════════════════╗ -->
+        <!-- ║ 10. FLUJO DE UNA ORDEN               ║ -->
+        <!-- ╚══════════════════════════════════════╝ -->
+        <div class="section" id="flujo-orden">
+            <span class="section-anchor"></span>
+            <div class="section-title">
+                <span class="num">10</span>
+                Ciclo de Vida de una Orden Rappi
+            </div>
+            <p>Así es como un pedido viaja desde que el cliente lo hace en Rappi hasta que se completa en tu negocio:</p>
+
+            <div class="flow">
+                <div class="flow-item">
+                    <div class="fi-icon">📱</div>
+                    <div class="fi-label">Cliente pide</div>
+                    <div class="fi-desc">en la app Rappi</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-item active">
+                    <div class="fi-icon">🔔</div>
+                    <div class="fi-label">Webhook / Cron</div>
+                    <div class="fi-desc">Notifica a Odoo</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-item">
+                    <div class="fi-icon">📋</div>
+                    <div class="fi-label">rappi.order</div>
+                    <div class="fi-desc">Registro creado</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-item">
+                    <div class="fi-icon">💰</div>
+                    <div class="fi-label">Sale Order</div>
+                    <div class="fi-desc">Orden de Venta</div>
+                </div>
+            </div>
+
+            <div class="flow" style="margin-top: 10px; justify-content: center;">
+                <div class="flow-item">
+                    <div class="fi-icon">🖥️</div>
+                    <div class="fi-label">POS Order</div>
+                    <div class="fi-desc">Mesa en piso Rappi</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-item active">
+                    <div class="fi-icon">🍳</div>
+                    <div class="fi-label">Cocina (KDS)</div>
+                    <div class="fi-desc">Preparación</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-item">
+                    <div class="fi-icon">✅</div>
+                    <div class="fi-label">Done</div>
+                    <div class="fi-desc">Auto-pago y cierre</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-item">
+                    <div class="fi-icon">🛵</div>
+                    <div class="fi-label">Entrega</div>
+                    <div class="fi-desc">Rappi rider</div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 24px;">
+                <div class="card-title"><span class="dot"></span> Detalles del flujo POS</div>
+                <p style="font-size:14px; color: var(--text-light); margin-bottom: 12px;">Cuando el módulo crea una orden en el POS, hace lo siguiente:</p>
+                <ol class="steps">
+                    <li>Busca (o crea) un <strong>piso</strong> llamado <strong>"Rappi"</strong> en el POS configurado.</li>
+                    <li>Crea una <strong>mesa</strong> dentro de ese piso con el nombre/número del pedido de Rappi como identificador.</li>
+                    <li>Crea la <strong>orden POS</strong> asignada a esa mesa, con estado "borrador" (draft).</li>
+                    <li>Busca o crea un <strong>cliente</strong> con los datos que envía Rappi (nombre, teléfono, email, documento).</li>
+                    <li>Agrega las <strong>líneas de producto</strong> según los ítems del pedido. Si un producto no existe, lo crea automáticamente.</li>
+                    <li>Si hay <strong>descuento</strong>, agrega una línea negativa con producto "RAPPI-DISCOUNT".</li>
+                    <li>Envía la orden a la <strong>Pantalla de Preparación</strong> (KDS) para que la cocina la vea.</li>
+                </ol>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="dot"></span> Estados de las órdenes en el rastreo</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Color</th>
+                                <th>Estados</th>
+                                <th>Significado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="tag orange">Naranja</span></td>
+                                <td><code>created</code>, <code>pending</code>, <code>new</code>, <code>accepted</code>, <code>in_progress</code>, <code>cooking</code>, <code>ready</code>, <code>waiting</code></td>
+                                <td>El pedido está pendiente o en preparación.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="tag green">Verde</span></td>
+                                <td><code>completed</code>, <code>delivered</code>, <code>finished</code>, <code>done</code>, <code>paid</code></td>
+                                <td>El pedido fue completado y entregado.</td>
+                            </tr>
+                            <tr>
+                                <td><span class="tag red">Rojo</span></td>
+                                <td><code>cancelled</code>, <code>canceled</code>, <code>rejected</code></td>
+                                <td>El pedido fue cancelado o rechazado.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ╔══════════════════════════════════════╗ -->
+        <!-- ║ 11. COCINA / KDS                     ║ -->
+        <!-- ╚══════════════════════════════════════╝ -->
+        <div class="section" id="cocina">
+            <span class="section-anchor"></span>
+            <div class="section-title">
+                <span class="num">11</span>
+                Pantalla de Cocina (Kitchen Display / KDS)
+            </div>
+            <p>Los pedidos de Rappi aparecen automáticamente en la pantalla de cocina. Cuando el equipo marca el pedido como terminado, <strong>la orden POS se cierra y se paga automáticamente</strong>.</p>
+
+            <div class="card">
+                <div class="card-title"><span class="dot"></span> ¿Cómo funciona el auto-cierre?</div>
+                <ol class="steps">
+                    <li>El pedido de Rappi llega al sistema y aparece en la <strong>Pantalla de Preparación</strong>.</li>
+                    <li>El cocinero prepara el pedido y pulsa <strong>"Done"</strong> en la última etapa del KDS.</li>
+                    <li>El módulo intercepta esa acción y busca la orden POS vinculada.</li>
+                    <li>Elimina cualquier pago previo fantasma (si los hubiera).</li>
+                    <li>Crea automáticamente un <strong>pago</strong> por el total usando el <strong>Método de pago Rappi</strong> configurado.</li>
+                    <li>Marca la orden como <strong>pagada</strong>.</li>
+                    <li>Deja un mensaje de auditoría: <em>"Orden cerrada automáticamente desde la Kitchen Display (Done)."</em></li>
+                </ol>
+            </div>
+
+            <div class="info-box warning">
+                <span class="ib-icon">⚠️</span>
+                <div><strong>Requisito:</strong> Para que el auto-cierre funcione, debes tener configurado:
+                    <ul style="margin-top:6px; padding-left:18px;">
+                        <li>Un <strong>Método de pago Rappi</strong> en la configuración del módulo.</li>
+                        <li>Una <strong>Pantalla de Preparación</strong> vinculada al POS destino (se configura en <em>Punto de Venta → Configuración → Pantallas de preparación</em>).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="info-box tip">
+                <span class="ib-icon">💡</span>
+                <div><strong>Limpieza automática:</strong> Cuando una orden Rappi se marca como pagada/completada, el módulo elimina automáticamente las órdenes "fantasma" (borradores con nota "Rappi #...") que pudieran haberse creado en la misma mesa, evitando duplicados.</div>
+            </div>
+        </div>
+
+        <!-- ╔══════════════════════════════════════╗ -->
+        <!-- ║ 12. CRONS                            ║ -->
+        <!-- ╚══════════════════════════════════════╝ -->
+        <div class="section" id="crons">
+            <span class="section-anchor"></span>
+            <div class="section-title">
+                <span class="num">12</span>
+                Tareas Automáticas (Cron Jobs)
+            </div>
+            <p>El módulo configura dos tareas automáticas que se ejecutan en segundo plano sin que tengas que hacer nada:</p>
+
+            <div class="card">
+                <div class="card-title"><span class="dot"></span> Tareas programadas</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tarea</th>
+                                <th>Frecuencia</th>
+                                <th>¿Qué hace?</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Rappi: Refresh Token</strong></td>
+                                <td>Cada <span class="tag blue">30 minutos</span></td>
+                                <td>Renueva automáticamente el token de autenticación con Rappi para que la conexión nunca se interrumpa.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Rappi: Pull Orders</strong></td>
+                                <td>Cada <span class="tag orange">5 minutos</span></td>
+                                <td>Descarga los pedidos nuevos de Rappi y los procesa (crea órdenes de venta, órdenes POS, envía a cocina).</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="info-box note">
+                <span class="ib-icon">📌</span>
+                <div><strong>¿Dónde se ven?</strong> Puedes ver y modificar estas tareas en <em>Ajustes → Técnico → Automatización → Acciones programadas</em>. Busca por "Rappi". Solo los administradores pueden acceder a esta sección.</div>
+            </div>
+        </div>
+
+        <!-- ╔══════════════════════════════════════╗ -->
+        <!-- ║ 13. MODELOS TÉCNICOS                 ║ -->
+        <!-- ╚══════════════════════════════════════╝ -->
+        <div class="section" id="modelos">
+            <span class="section-anchor"></span>
+            <div class="section-title">
+                <span class="num">13</span>
+                Modelos y Datos Técnicos
+            </div>
+            <p>Referencia técnica de los modelos que utiliza el módulo (útil para soporte y desarrollo).</p>
+
+            <div class="card">
+                <div class="card-title"><span class="dot"></span> Modelos propios</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Modelo</th>
+                                <th>Descripción</th>
+                                <th>Campos principales</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>rappi.settings</code></td>
+                                <td>Configuración de la conexión con Rappi. Una por tienda.</td>
+                                <td><code>store_id</code>, <code>client_id</code>, <code>client_secret</code>, <code>base_url</code>, <code>environment</code>, <code>pos_config_id</code>, <code>rappi_payment_method_id</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>rappi.order</code></td>
+                                <td>Registro de cada pedido de Rappi con su payload completo.</td>
+                                <td><code>rappi_order_id</code>, <code>status</code>, <code>raw_payload</code>, <code>store_id</code>, <code>settings_id</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>rappi.token</code></td>
+                                <td>Almacena el token JWT de autenticación con la API de Rappi.</td>
+                                <td><code>token</code>, <code>expires_at</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>rappi.push.menu.wizard</code></td>
+                                <td>Asistente para enviar productos a Rappi desde un formulario emergente.</td>
+                                <td><code>settings_id</code>, <code>product_ids</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="dot"></span> Modelos extendidos (heredados)</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Modelo</th>
+                                <th>Campos / Métodos añadidos</th>
+                                <th>¿Para qué?</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>pos.order</code></td>
+                                <td><code>is_rappi</code>, <code>rappi_order_id</code>, <code>rappi_elapsed_time</code></td>
+                                <td>Identificar qué órdenes POS vienen de Rappi y medir el tiempo transcurrido.</td>
+                            </tr>
+                            <tr>
+                                <td><code>product.template</code></td>
+                                <td><code>rappi_item_id</code>, <code>rappi_sku</code></td>
+                                <td>Vincular productos de Odoo con su equivalente en Rappi.</td>
+                            </tr>
+                            <tr>
+                                <td><code>pos.config</code></td>
+                                <td><code>order_status_update()</code></td>
+                                <td>Cierre automático de órdenes Rappi cuando la cocina marca "Food Ready".</td>
+                            </tr>
+                            <tr>
+                                <td><code>pos_preparation_display.order</code></td>
+                                <td><code>action_close_related_pos_order()</code></td>
+                                <td>Cierra y paga la orden POS cuando se marca como terminada en la pantalla de cocina.</td>
+                            </tr>
+                            <tr>
+                                <td><code>pos.session</code></td>
+                                <td><code>_loader_params_pos_order()</code></td>
+                                <td>Carga los campos <code>is_rappi</code> y <code>rappi_order_id</code> en la interfaz del POS.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ╔══════════════════════════════════════╗ -->
+        <!-- ║ 14. SEGURIDAD                        ║ -->
+        <!-- ╚══════════════════════════════════════╝ -->
+        <div class="section" id="seguridad">
+            <span class="section-anchor"></span>
+            <div class="section-title">
+                <span class="num">14</span>
+                Seguridad y Permisos
+            </div>
+            <p>El módulo define reglas de acceso para controlar quién puede ver y modificar los datos de Rappi.</p>
+
+            <div class="card">
+                <div class="card-title"><span class="dot"></span> Reglas de acceso</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Modelo</th>
+                                <th>Grupo</th>
+                                <th>Leer</th>
+                                <th>Crear</th>
+                                <th>Editar</th>
+                                <th>Eliminar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>rappi.order</code></td>
+                                <td><span class="tag blue">Usuarios internos</span></td>
+                                <td>✅</td><td>✅</td><td>✅</td><td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>rappi.settings</code></td>
+                                <td><span class="tag red">Solo administradores</span></td>
+                                <td>✅</td><td>✅</td><td>✅</td><td>✅</td>
+                            </tr>
+                            <tr>
+                                <td><code>rappi.token</code></td>
+                                <td><span class="tag red">Solo administradores</span></td>
+                                <td>✅</td><td>✅</td><td>✅</td><td>✅</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="info-box warning">
+                <span class="ib-icon">⚠️</span>
+                <div><strong>Nota de seguridad:</strong> Solo los <strong>administradores</strong> del sistema pueden configurar las credenciales de Rappi (Client ID, Client Secret, Token). Los usuarios internos normales pueden ver los pedidos pero <strong>no pueden modificar la configuración</strong>.</div>
+            </div>
+        </div>
+
+        <!-- ╔══════════════════════════════════════╗ -->
+        <!-- ║ 15. PREGUNTAS FRECUENTES (FAQ)       ║ -->
+        <!-- ╚══════════════════════════════════════╝ -->
+        <div class="section" id="faq">
+            <span class="section-anchor"></span>
+            <div class="section-title">
+                <span class="num">15</span>
+                Preguntas Frecuentes
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="dot"></span> ¿El módulo soporta varias tiendas de Rappi?</div>
+                <p style="font-size:14px;">Sí. Puedes crear una configuración (<em>rappi.settings</em>) por cada tienda. Cada una tendrá su propio Store ID, credenciales y POS destino.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="dot"></span> ¿Qué pasa si el POS no tiene sesión abierta?</div>
+                <p style="font-size:14px;">La orden de venta (<em>sale.order</em>) se crea sin problema, pero la orden POS no se podrá crear. Verás un aviso indicando que debes abrir la sesión del POS.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="dot"></span> ¿Los productos se duplican si hago Pull varias veces?</div>
+                <p style="font-size:14px;">No. El sistema busca por SKU antes de crear. Si el producto ya existe (mismo código interno o Rappi SKU), se omite.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="dot"></span> ¿Puedo usar el módulo solo para ventas (sin POS)?</div>
+                <p style="font-size:14px;">Sí. Si no configuras un POS destino, el módulo solo creará órdenes de venta (<em>sale.order</em>). No intentará crear órdenes POS ni enviar a cocina.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="dot"></span> ¿Cómo veo solo las órdenes de Rappi en el POS?</div>
+                <p style="font-size:14px;">El módulo agrega un menú <strong>"Órdenes Rappi"</strong> dentro del módulo de Punto de Venta. Allí puedes ver todas las órdenes POS que tienen la bandera <em>is_rappi = true</em>, con el tiempo transcurrido desde su creación.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="dot"></span> ¿Qué pasa con los descuentos de Rappi?</div>
+                <p style="font-size:14px;">Si el pedido incluye un descuento (<em>discountTotal</em> o <em>discount</em>), el módulo crea una línea adicional con un producto llamado <strong>"Rappi Discount"</strong> (código: RAPPI-DISCOUNT) con monto negativo. Así el total de la orden refleja el descuento correctamente.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="dot"></span> ¿Qué navegadores soporta la pantalla de cocina (KDS)?</div>
+                <p style="font-size:14px;">Cualquier navegador moderno: Chrome, Firefox, Edge, Safari. La pantalla de cocina es una página web dentro de Odoo, así que puedes abrirla en una tablet o un monitor dedicado.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><span class="dot"></span> ¿El token se renueva solo?</div>
+                <p style="font-size:14px;">Sí. El cron <em>"Rappi: Refresh Token"</em> se ejecuta cada 30 minutos automáticamente. También puedes renovarlo manualmente con el botón <strong>"Refresh Token"</strong> en la configuración.</p>
+            </div>
+        </div>
+
+    </div><!-- /content -->
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <strong>COONDEV</strong> — FBZ Rappi Connector v18 — Guía Funcional<br>
+        Módulo desarrollado para Odoo 18 Community / Enterprise
+    </div>
+
+</div><!-- /main -->
+
+</body>
+</html>
