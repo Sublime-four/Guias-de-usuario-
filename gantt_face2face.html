@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gantt — FACE2FACE · Coondev 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --plum:       #875a7b;
+  --plum-mid:   #a07090;
+  --plum-light: #c4a0bc;
+  --plum-pale:  #f4edf2;
+  --plum-xpale: #faf6f9;
+  --gray:       #8f8f8f;
+  --gray-light: #b8b8b8;
+  --gray-pale:  #f0f0f0;
+  --gray-xpale: #f8f8f8;
+
+  --col-cap:    #875a7b;
+  --col-prueba: #5a7887;
+  --col-corr:   #8f8f8f;
+  --col-migr:   #6b3d62;
+  --col-simul:  #3d7a60;
+  --col-acta:   #3d6b7a;
+  --col-golive: #6b3d62;
+
+  --bg:         #ffffff;
+  --surface2:   #faf6f9;
+  --header-bg:  #875a7b;
+  --border:     #e8e0e6;
+  --border2:    #c8b4c0;
+  --text:       #2a1f28;
+  --muted:      #8f8f8f;
+  --muted2:     #c0c0c0;
+
+  --row-h:   58px;
+  --ph-h:    34px;
+  --day-w:   36px;
+  --label-w: 360px;
+  --bar-h:   24px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: #ede4ea;
+  font-family: 'IBM Plex Sans', sans-serif;
+  color: var(--text);
+  overflow-x: auto;
+}
+
+/* ════════════ HEADER ════════════ */
+.page-header {
+  background: var(--header-bg);
+  padding: 30px 44px 28px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+  position: relative;
+  overflow: hidden;
+}
+.page-header::before {
+  content:''; position:absolute; right:-90px; top:-90px;
+  width:300px; height:300px; border-radius:50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.07) 0%, transparent 65%);
+}
+
+.brand { display:flex; align-items:center; gap:14px; flex-shrink:0; }
+.brand-logo {
+  width:46px; height:46px;
+  background:rgba(255,255,255,0.12);
+  border:1px solid rgba(255,255,255,0.25);
+  border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+}
+.brand-name {
+  font-family:'Playfair Display',serif;
+  font-size:22px; color:#fff; letter-spacing:2px; line-height:1;
+}
+.brand-tag {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px; color:rgba(255,255,255,0.5);
+  letter-spacing:2px; text-transform:uppercase; margin-top:4px;
+}
+
+.header-center { flex:1; }
+.header-center h1 {
+  font-family:'Playfair Display',serif;
+  font-size:19px; color:#fff; margin-bottom:8px; line-height:1.2;
+}
+.client-pill {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3);
+  padding:4px 14px; border-radius:20px;
+  font-family:'IBM Plex Mono',monospace; font-size:10px;
+  color:#fff; letter-spacing:2px; text-transform:uppercase;
+}
+.notice-pill {
+  margin-top:9px; display:inline-flex; align-items:center; gap:6px;
+  background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);
+  padding:4px 13px; border-radius:6px; font-size:11px;
+  color:rgba(255,255,255,0.85);
+}
+.notice-pill strong { color:#fff; }
+
+.header-stats { display:flex; gap:28px; align-items:flex-start; flex-shrink:0; }
+.hstat { text-align:right; }
+.hstat-val { font-family:'Playfair Display',serif; font-size:22px; color:#fff; line-height:1; }
+.hstat-lbl {
+  font-family:'IBM Plex Mono',monospace; font-size:9px;
+  color:rgba(255,255,255,0.5); letter-spacing:1.5px;
+  text-transform:uppercase; margin-top:3px;
+}
+.hstat.golive .hstat-val { color:#e8d0e2; font-size:18px; }
+
+/* ════════════ GANTT OUTER ════════════ */
+.gantt-outer { background:#ede4ea; padding:20px 20px 0; }
+
+.gantt-wrap {
+  display:flex;
+  background:var(--bg);
+  border-radius:10px;
+  box-shadow: 0 2px 20px rgba(135,90,123,0.14), 0 1px 4px rgba(0,0,0,0.05);
+  border:1px solid var(--border2);
+  overflow-x:auto;
+}
+
+/* ════════════ LEFT PANEL ════════════ */
+.left-panel {
+  width:var(--label-w);
+  min-width:var(--label-w);
+  flex-shrink:0;
+  border-right:2px solid var(--border2);
+  background:var(--bg);
+  position:sticky; left:0; z-index:20;
+  box-shadow:3px 0 12px rgba(135,90,123,0.07);
+}
+
+.col-title {
+  height:82px;
+  border-bottom:2px solid var(--border2);
+  padding:0 24px;
+  display:flex; align-items:center;
+  background:var(--plum-xpale);
+}
+.col-title span {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px; letter-spacing:2px;
+  text-transform:uppercase; color:var(--plum-mid); font-weight:500;
+}
+
+/* Phase label row */
+.phase-label {
+  height:var(--ph-h);
+  padding:0 22px;
+  display:flex; align-items:center; gap:10px;
+  background:var(--plum-xpale);
+  border-top:2px solid var(--border2);
+  border-bottom:1px solid var(--border);
+}
+.phase-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.phase-label-text {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9.5px; letter-spacing:1.2px;
+  text-transform:uppercase; font-weight:700;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.phase-label-hours {
+  margin-left:auto; flex-shrink:0;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:8.5px; font-weight:600;
+  padding:2px 10px; border-radius:10px;
+  background:rgba(135,90,123,0.1);
+  color:var(--plum);
+  border:1px solid rgba(135,90,123,0.2);
+}
+
+/* Task row label */
+.task-row-label {
+  height:var(--row-h);
+  padding:0 22px;
+  display:flex; flex-direction:column; justify-content:center; gap:6px;
+  border-bottom:1px solid var(--border);
+  cursor:default; transition:background 0.12s;
+}
+.task-row-label:hover { background:var(--plum-xpale); }
+
+.task-name {
+  font-size:12.5px; font-weight:500;
+  color:var(--text); line-height:1.4;
+}
+.task-meta { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.task-who {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px; color:var(--muted); line-height:1;
+}
+.hours-badge {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px; font-weight:600;
+  padding:2px 8px; border-radius:4px;
+  flex-shrink:0; color:#fff;
+}
+.time-badge {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px; color:var(--muted2);
+}
+
+/* ════════════ RIGHT PANEL ════════════ */
+.right-panel { flex:1; background:var(--bg); position:relative; }
+
+/* Timeline header */
+.timeline-head {
+  height:82px; position:sticky; top:0; z-index:15;
+  background:var(--plum-xpale);
+  border-bottom:2px solid var(--border2);
+}
+.tl-months {
+  height:28px; position:relative;
+  border-bottom:1px solid var(--border);
+}
+.month-label {
+  position:absolute; top:0; bottom:0;
+  display:flex; align-items:center;
+  padding:0 12px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px; font-weight:700;
+  letter-spacing:2.5px; text-transform:uppercase;
+  color:var(--plum);
+  border-right:1px solid var(--border2);
+}
+.tl-days { height:54px; position:relative; }
+.day-cell-head {
+  position:absolute; top:0; bottom:0;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:2px;
+  border-right:1px solid var(--border);
+}
+.day-cell-head.week-start { border-left:2px solid var(--border2); }
+.day-abbr {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:8px; color:var(--muted2);
+  letter-spacing:0.5px; text-transform:uppercase;
+}
+.day-num-head {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:13px; font-weight:600; color:var(--gray);
+}
+.day-cell-head.week-start .day-num-head { color:var(--plum); }
+
+/* Grid rows */
+.phase-row-right {
+  height:var(--ph-h); position:relative;
+  background:var(--plum-xpale);
+  border-top:2px solid var(--border2);
+  border-bottom:1px solid var(--border);
+}
+.task-row-right {
+  height:var(--row-h); position:relative;
+  border-bottom:1px solid var(--border);
+  background:#fff; transition:background 0.12s;
+}
+.task-row-right.alt { background:var(--gray-xpale); }
+.task-row-right:hover { background:var(--plum-xpale); }
+
+.day-line { position:absolute; top:0; bottom:0; width:1px; background:var(--border); pointer-events:none; }
+.day-line.week-line { background:var(--border2); width:2px; }
+
+/* ════════════ BARS ════════════ */
+.g-bar {
+  position:absolute; top:50%; transform:translateY(-50%);
+  height:var(--bar-h); border-radius:5px;
+  display:flex; align-items:center; padding:0 10px;
+  font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:500;
+  white-space:nowrap; overflow:hidden; cursor:pointer;
+  transition:filter 0.15s, transform 0.15s; z-index:4; color:#fff;
+}
+.g-bar:hover { filter:brightness(1.1); transform:translateY(-50%) scaleY(1.1); z-index:10; }
+
+.g-bar.bar-cap    { background:var(--col-cap);    box-shadow:0 2px 8px rgba(135,90,123,0.35); }
+.g-bar.bar-prueba { background:var(--col-prueba);  box-shadow:0 2px 8px rgba(90,120,135,0.3); }
+.g-bar.bar-corr   { background:var(--col-corr);    box-shadow:0 2px 6px rgba(143,143,143,0.4); }
+.g-bar.bar-migr   { background:var(--col-migr);    box-shadow:0 2px 8px rgba(107,61,98,0.4); }
+.g-bar.bar-simul  { background:var(--col-simul);   box-shadow:0 2px 8px rgba(61,122,96,0.35); }
+.g-bar.bar-acta   { background:var(--col-acta);    box-shadow:0 2px 8px rgba(61,107,122,0.35); }
+.g-bar.bar-hito   { background:var(--plum);        box-shadow:0 2px 10px rgba(135,90,123,0.45); }
+.g-bar.bar-golive {
+  background:linear-gradient(90deg, var(--plum), #6b3d62);
+  font-weight:700; font-size:10px; letter-spacing:0.5px;
+  box-shadow:0 3px 14px rgba(135,90,123,0.5);
+}
+.g-bar.bar-internal {
+  background:var(--gray-pale); color:var(--gray);
+  border:1.5px dashed var(--gray-light); box-shadow:none;
+}
+.g-bar.bar-buffer {
+  background:var(--gray-pale); color:var(--gray);
+  border:1.5px dashed var(--gray-light); box-shadow:none;
+  background-image:repeating-linear-gradient(
+    -45deg, transparent, transparent 5px,
+    rgba(143,143,143,0.07) 5px, rgba(143,143,143,0.07) 10px
+  );
+}
+
+/* Milestone diamond */
+.milestone-diamond {
+  position:absolute; top:50%;
+  transform:translateY(-50%) rotate(45deg);
+  width:13px; height:13px; border-radius:2px;
+  z-index:6; cursor:pointer; transition:transform 0.15s;
+}
+.milestone-diamond:hover { transform:translateY(-50%) rotate(45deg) scale(1.35); }
+.md-plum   { background:var(--plum);   box-shadow:0 0 10px rgba(135,90,123,0.6); }
+.md-golive { background:#6b3d62;       box-shadow:0 0 14px rgba(107,61,98,0.7); }
+
+/* ════════════ TOOLTIP ════════════ */
+.tooltip {
+  position:fixed; background:#fff;
+  border:1px solid var(--border2); border-radius:10px;
+  padding:12px 16px; pointer-events:none;
+  z-index:9999; opacity:0; transition:opacity 0.15s;
+  max-width:270px;
+  box-shadow:0 8px 28px rgba(135,90,123,0.18), 0 2px 8px rgba(0,0,0,0.06);
+}
+.tooltip.visible { opacity:1; }
+.tt-title {
+  font-weight:600; margin-bottom:8px; line-height:1.4;
+  color:var(--plum); font-size:12px;
+}
+.tt-row {
+  display:flex; gap:8px; margin-top:4px;
+  font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted);
+}
+.tt-row span { color:var(--text); }
+
+/* ════════════ LEGEND ════════════ */
+.legend-bar {
+  background:#fff; border-top:2px solid var(--border2);
+  padding:16px 28px;
+  display:flex; flex-wrap:wrap; gap:12px 22px; align-items:center;
+  border-radius:0 0 10px 10px;
+}
+.leg-item {
+  display:flex; align-items:center; gap:7px;
+  font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--gray);
+}
+.leg-swatch { width:22px; height:9px; border-radius:2px; }
+.leg-diamond { width:10px; height:10px; border-radius:1px; transform:rotate(45deg); }
+
+/* ════════════ FOOTER ════════════ */
+.footer {
+  background:var(--plum-xpale);
+  border-top:1px solid var(--border);
+  padding:12px 28px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.footer-info {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px; color:var(--plum-light); letter-spacing:1px;
+}
+
+/* ════════════ ANIMATIONS ════════════ */
+@keyframes barIn {
+  from { opacity:0; clip-path:inset(0 100% 0 0); }
+  to   { opacity:1; clip-path:inset(0 0 0 0); }
+}
+.g-bar { animation:barIn 0.45s cubic-bezier(.4,0,.2,1) both; }
+
+@keyframes rowFade {
+  from { opacity:0; transform:translateX(-5px); }
+  to   { opacity:1; transform:translateX(0); }
+}
+.task-row-label { animation:rowFade 0.3s ease both; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="page-header">
+  <div class="brand">
+    <div class="brand-logo">
+      <svg width="26" height="26" viewBox="0 0 100 100">
+        <line x1="50" y1="8"  x2="50" y2="16" stroke="rgba(255,255,255,0.8)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="77" y1="23" x2="72" y2="28" stroke="rgba(255,255,255,0.8)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="85" y1="50" x2="78" y2="50" stroke="rgba(255,255,255,0.8)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="23" y1="23" x2="28" y2="28" stroke="rgba(255,255,255,0.8)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="15" y1="50" x2="22" y2="50" stroke="rgba(255,255,255,0.8)" stroke-width="3" stroke-linecap="round"/>
+        <path d="M50 28 Q65 33,65 48 Q65 58,58 64 L58 67 L42 67 L42 64 Q35 58,35 48 Q35 33,50 28Z"
+              fill="#f0d4e8" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+        <line x1="42" y1="69" x2="58" y2="69" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>
+        <line x1="42" y1="73" x2="58" y2="73" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>
+        <line x1="42" y1="77" x2="58" y2="77" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>
+      </svg>
+    </div>
+    <div>
+      <div class="brand-name">COONDEV</div>
+      <div class="brand-tag">Consulting &amp; Development</div>
+    </div>
+  </div>
+
+  <div class="header-center">
+    <h1>Diagrama de Gantt — Implementación Odoo</h1>
+    <div class="client-pill">▸ PROYECTO FACE2FACE</div>
+    <div class="notice-pill">⚠ Cronograma reprogramado — Nuevo inicio: <strong>&nbsp;Vie 27 Feb 2026</strong></div>
+  </div>
+
+  <div class="header-stats">
+    <div class="hstat"><div class="hstat-val">27 Feb</div><div class="hstat-lbl">Nuevo inicio</div></div>
+    <div class="hstat"><div class="hstat-val">28 Mar</div><div class="hstat-lbl">Acta firmada</div></div>
+    <div class="hstat golive"><div class="hstat-val">1 ABR</div><div class="hstat-lbl">Go-Live</div></div>
+  </div>
+</div>
+
+<!-- GANTT -->
+<div class="gantt-outer">
+  <div class="gantt-wrap" id="ganttWrap">
+    <div class="left-panel" id="leftPanel">
+      <div class="col-title"><span>Actividad / Responsable</span></div>
+    </div>
+    <div class="right-panel" id="rightPanel"></div>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend-bar">
+    <div class="leg-item"><div class="leg-swatch" style="background:var(--col-cap)"></div>Capacitación</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:var(--col-prueba)"></div>Prueba Integral 70/30</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:var(--col-corr)"></div>Correcciones</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:var(--col-migr)"></div>Migración</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:var(--col-simul)"></div>Simulacro</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:var(--col-acta)"></div>Firma de Acta</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:#e8e8e8;border:1.5px dashed var(--gray-light)"></div>Interno / Colchón</div>
+    <div class="leg-item"><div class="leg-diamond" style="background:var(--plum)"></div>Hito</div>
+    <div class="leg-item"><div class="leg-diamond" style="background:#6b3d62"></div>Go-Live</div>
+    <div style="margin-left:auto;" class="leg-item">Horario reuniones: 9:00 AM · Lun–Vie</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-info">COONDEV · Proyecto Face2Face · Cronograma actualizado — Feb 2026</div>
+  <div class="footer-info">Generado: 26 Feb 2026 &nbsp;·&nbsp; Go-Live: 1 Abr 2026</div>
+</div>
+
+<!-- TOOLTIP -->
+<div class="tooltip" id="tooltip">
+  <div class="tt-title" id="ttTitle"></div>
+  <div class="tt-row" id="ttDate"></div>
+  <div class="tt-row" id="ttWho"></div>
+  <div class="tt-row" id="ttHours"></div>
+</div>
+
+<script>
+const DAY_W  = 36;
+const ROW_H  = 58;
+const PH_H   = 34;
+const HEAD_H = 82;
+
+const DAYS = [
+  {d:'27',m:'Feb',abbr:'V',ws:false},{d:'02',m:'Mar',abbr:'L',ws:true},
+  {d:'03',m:'Mar',abbr:'M',ws:false},{d:'04',m:'Mar',abbr:'X',ws:false},
+  {d:'05',m:'Mar',abbr:'J',ws:false},{d:'06',m:'Mar',abbr:'V',ws:false},
+  {d:'09',m:'Mar',abbr:'L',ws:true},{d:'10',m:'Mar',abbr:'M',ws:false},
+  {d:'11',m:'Mar',abbr:'X',ws:false},{d:'12',m:'Mar',abbr:'J',ws:false},
+  {d:'13',m:'Mar',abbr:'V',ws:false},{d:'16',m:'Mar',abbr:'L',ws:true},
+  {d:'17',m:'Mar',abbr:'M',ws:false},{d:'18',m:'Mar',abbr:'X',ws:false},
+  {d:'19',m:'Mar',abbr:'J',ws:false},{d:'20',m:'Mar',abbr:'V',ws:false},
+  {d:'23',m:'Mar',abbr:'L',ws:true},{d:'24',m:'Mar',abbr:'M',ws:false},
+  {d:'25',m:'Mar',abbr:'X',ws:false},{d:'26',m:'Mar',abbr:'J',ws:false},
+  {d:'27',m:'Mar',abbr:'V',ws:false},{d:'30',m:'Mar',abbr:'L',ws:true},
+  {d:'31',m:'Mar',abbr:'M',ws:false},{d:'01',m:'Abr',abbr:'X',ws:false},
+  {d:'02',m:'Abr',abbr:'J',ws:false},{d:'03',m:'Abr',abbr:'V',ws:false},
+  {d:'06',m:'Abr',abbr:'L',ws:true},{d:'07',m:'Abr',abbr:'M',ws:false},
+  {d:'08',m:'Abr',abbr:'X',ws:false},{d:'09',m:'Abr',abbr:'J',ws:false},
+  {d:'10',m:'Abr',abbr:'V',ws:false},{d:'13',m:'Abr',abbr:'L',ws:true},
+  {d:'14',m:'Abr',abbr:'M',ws:false},{d:'15',m:'Abr',abbr:'X',ws:false},
+  {d:'16',m:'Abr',abbr:'J',ws:false},
+];
+const TL_W = DAYS.length * DAY_W;
+
+const PHASES = [
+  { label:'Semana 2 · Capacitación Concentrada', dates:'27 Feb – 6 Mar', hours:'25h', color:'#875a7b',
+    tasks:[
+      {name:'Contabilidad + Localización CO',            who:'Contador',                       hours:'6h', time:'9:00–15:00', start:0,  dur:1, type:'cap',      milestone:true},
+      {name:'Compras + Importaciones',                    who:'Gerente de Abastecimiento',       hours:'4h', time:'9:00–13:00', start:1,  dur:1, type:'cap'},
+      {name:'Inventarios + Logística',                    who:'Todas las áreas',                 hours:'4h', time:'9:00–13:00', start:2,  dur:1, type:'cap'},
+      {name:'RH + Nómina',                               who:'Líder Técnico + RH',              hours:'6h', time:'9:00–15:00', start:3,  dur:1, type:'cap'},
+      {name:'Punto de Venta — Refuerzo',                 who:'Personal PV',                     hours:'4h', time:'9:00–13:00', start:4,  dur:1, type:'cap'},
+      {name:'Recepción Plantillas + Firma Acta Validación',who:'Validación conjunta',            hours:'2h', time:'9:00–11:00', start:5,  dur:1, type:'hito',     milestone:true},
+    ]
+  },
+  { label:'Semana 3 · Prueba Integral 70/30', dates:'9 – 13 Mar', hours:'23h', color:'#5a7887',
+    tasks:[
+      {name:'PLM · Compras · Importaciones · Logística · WMS · Costeo · Contabilidad · CXP · Tesorería',
+                                                          who:'70% Prueba / 30% Capacitación',  hours:'4h', time:'9:00–13:00', start:6,  dur:1, type:'prueba'},
+      {name:'Logística: Traslados · Picking · Inventarios · WMS  +  POS: Apertura · Ventas · Cierre',
+                                                          who:'70% Prueba / 30% Capacitación',  hours:'5h', time:'9:00–14:15', start:7,  dur:1, type:'prueba'},
+      {name:'Ventas: Pedido · Despacho · WMS · Facturación · Cartera · Cierre',
+                                                          who:'70% Prueba / 30% Capacitación',  hours:'4h', time:'9:00–13:00', start:8,  dur:1, type:'prueba'},
+      {name:'Sync Shopify / Marketplaces · Facturación · Tesorería · Contabilidad',
+                                                          who:'70% Prueba / 30% Capacitación',  hours:'4h', time:'9:00–13:00', start:9,  dur:1, type:'prueba'},
+      {name:'Escenarios End-to-End + Gaps Críticos',      who:'70% Prueba / 30% Capacitación',  hours:'4h', time:'9:00–13:00', start:10, dur:1, type:'prueba'},
+    ]
+  },
+  { label:'Semana 4 · Correcciones + Migración', dates:'16 – 20 Mar', hours:'15h', color:'#8f8f8f',
+    tasks:[
+      {name:'Corrección de Configuraciones Críticas',     who:'Equipo interno (sin cliente)',    hours:'—',  time:'9:00–13:00', start:11, dur:2, type:'internal'},
+      {name:'Re-migración a Productivo — HITO CRÍTICO',   who:'Contabilidad + Técnico',          hours:'6h', time:'9:00–15:00', start:13, dur:1, type:'migr',     milestone:true},
+      {name:'Re-ejecución de Escenarios Críticos',        who:'Ambiente productivo',             hours:'4h', time:'9:00–13:00', start:14, dur:1, type:'corr'},
+      {name:'Pruebas de Volumen + Performance',           who:'Casos edge',                      hours:'5h', time:'9:00–14:00', start:15, dur:1, type:'corr'},
+    ]
+  },
+  { label:'Semana 5 · Simulacro + Cierre', dates:'23 – 27 Mar', hours:'16h', color:'#3d7a60',
+    tasks:[
+      {name:'Preparación interna (sin cliente)',          who:'Equipo Coondev',                  hours:'—',  time:'Interna',    start:16, dur:1, type:'internal'},
+      {name:'SIMULACRO GO-LIVE COMPLETO — Día operativo real', who:'Todas las áreas',            hours:'8h', time:'9:00–17:00', start:18, dur:1, type:'simul',    milestone:true},
+      {name:'Revisión Hallazgos + Correcciones Urgentes', who:'Ajustes post-simulacro',          hours:'4h', time:'9:00–13:00', start:19, dur:1, type:'corr'},
+      {name:'Validación Final + FIRMA ACTA DE CIERRE',    who:'Todo listo',                      hours:'4h', time:'9:00–13:00', start:20, dur:1, type:'acta',     milestone:true},
+    ]
+  },
+  { label:'Colchón de Seguridad', dates:'30 – 31 Mar', hours:'2 días', color:'#b8b8b8',
+    tasks:[
+      {name:'Ajustes menores · Monitoreo · Preparativos finales para Go-Live',
+                                                          who:'Equipo en standby',               hours:'—',  time:'Disponible', start:21, dur:2, type:'buffer'},
+    ]
+  },
+  { label:'GO-LIVE', dates:'1 Abr 2026', hours:'🚀', color:'#6b3d62',
+    tasks:[
+      {name:'GO-LIVE — Face2Face activo en Odoo',         who:'Todas las áreas',                 hours:'Día completo', time:'Mié 1 Abr 2026', start:23, dur:1, type:'golive', milestone:true},
+    ]
+  },
+];
+
+/* ── Build timeline header HTML ── */
+function buildHead() {
+  let months = '', curM = '', curS = 0;
+  DAYS.forEach((d,i)=>{
+    if(d.m !== curM){
+      if(curM){ months += `<div class="month-label" style="left:${curS*DAY_W}px;width:${(i-curS)*DAY_W}px">${curM.toUpperCase()}</div>`; }
+      curM=d.m; curS=i;
+    }
+    if(i===DAYS.length-1){ months += `<div class="month-label" style="left:${curS*DAY_W}px;width:${(i+1-curS)*DAY_W}px">${curM.toUpperCase()}</div>`; }
+  });
+
+  let dayCells = DAYS.map((d,i)=>{
+    const cls = ['day-cell-head', d.ws?'week-start':''].filter(Boolean).join(' ');
+    return `<div class="${cls}" style="left:${i*DAY_W}px;width:${DAY_W}px">
+      <div class="day-abbr">${d.abbr}</div>
+      <div class="day-num-head">${d.d}</div>
+    </div>`;
+  }).join('');
+
+  return `<div class="timeline-head" style="width:${TL_W}px">
+    <div class="tl-months" style="width:${TL_W}px">${months}</div>
+    <div class="tl-days" style="width:${TL_W}px;height:54px">${dayCells}</div>
+  </div>`;
+}
+
+/* ── Day grid lines ── */
+function dayLines() {
+  return DAYS.map((d,i)=>`<div class="day-line${d.ws?' week-line':''}" style="left:${i*DAY_W}px"></div>`).join('');
+}
+
+/* ── Single bar ── */
+function makeBar(task, idx) {
+  const s = Math.min(task.start, DAYS.length-1);
+  const left  = s*DAY_W + 3;
+  const width = Math.max(task.dur*DAY_W - 6, 8);
+  const delay = (idx*0.04).toFixed(2);
+  const label = (task.hours!=='—' && width>=36) ? task.hours : '';
+  const tt = JSON.stringify({name:task.name,who:task.who,hours:task.hours,time:task.time}).replace(/'/g,"&#39;");
+  let h = `<div class="g-bar bar-${task.type}" style="left:${left}px;width:${width}px;animation-delay:${delay}s"
+    data-tt='${tt}' onmouseenter="sT(event,this)" onmousemove="mT(event)" onmouseleave="hT()">${label}</div>`;
+  if(task.milestone){
+    const mc = task.type==='golive'?'md-golive':'md-plum';
+    h += `<div class="milestone-diamond ${mc}" style="left:${s*DAY_W+DAY_W/2-6.5}px;top:50%"></div>`;
+  }
+  return h;
+}
+
+/* ── Main render ── */
+function render(){
+  const lp = document.getElementById('leftPanel');
+  const rp = document.getElementById('rightPanel');
+  let lh='', rh=buildHead()+`<div style="position:relative;width:${TL_W}px">`;
+  let ri=0, altRow=false;
+
+  PHASES.forEach((ph,pi)=>{
+    const sd=(pi*0.06).toFixed(2);
+    lh+=`<div>
+      <div class="phase-label">
+        <div class="phase-dot" style="background:${ph.color}"></div>
+        <div class="phase-label-text" style="color:${ph.color}">${ph.label}</div>
+        <div class="phase-label-hours">${ph.hours}</div>
+      </div>`;
+    rh+=`<div class="phase-row-right" style="width:${TL_W}px">${dayLines()}</div>`;
+
+    ph.tasks.forEach((t,ti)=>{
+      const rd=((pi*5+ti)*0.04).toFixed(2);
+      const altCls = altRow ? ' alt':'';
+      altRow = !altRow;
+
+      lh+=`<div class="task-row-label" style="animation-delay:${rd}s">
+        <div class="task-name">${t.name}</div>
+        <div class="task-meta">
+          <span class="task-who">${t.who}</span>
+          ${t.hours!=='—'?`<span class="hours-badge" style="background:${ph.color}">${t.hours}</span>`:''}
+          <span class="time-badge">🕘 ${t.time}</span>
+        </div>
+      </div>`;
+
+      rh+=`<div class="task-row-right${altCls}" style="width:${TL_W}px">
+        ${dayLines()}${makeBar(t,ri)}
+      </div>`;
+      ri++;
+    });
+    lh+=`</div>`;
+  });
+
+  rh+=`</div>`;
+  lp.innerHTML+=lh;
+  rp.innerHTML=rh;
+}
+
+/* ── Tooltip ── */
+const ttEl=document.getElementById('tooltip');
+function sT(e,el){
+  const d=JSON.parse(el.dataset.tt);
+  document.getElementById('ttTitle').textContent=d.name;
+  document.getElementById('ttDate').innerHTML=`🕘 <span>${d.time}</span>`;
+  document.getElementById('ttWho').innerHTML=`👤 <span>${d.who}</span>`;
+  document.getElementById('ttHours').innerHTML=`⏱ <span>${d.hours}</span>`;
+  ttEl.classList.add('visible'); mT(e);
+}
+function mT(e){
+  let x=e.clientX+16, y=e.clientY+14;
+  if(x+275>window.innerWidth) x=e.clientX-280;
+  if(y+140>window.innerHeight) y=e.clientY-140;
+  ttEl.style.left=x+'px'; ttEl.style.top=y+'px';
+}
+function hT(){ ttEl.classList.remove('visible'); }
+
+render();
+</script>
+</body>
+</html>
