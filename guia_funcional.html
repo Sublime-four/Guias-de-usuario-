@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia Funcional - Cronometro Modulo de Barras | COONDEV</title>
+    <style>
+        :root {
+            --primary: #7B5B7B;
+            --primary-dark: #5E3F5E;
+            --primary-light: #9B7B9B;
+            --secondary: #4A2D4A;
+            --accent: #C9A0C9;
+            --dark: #2E1A2E;
+            --gray-100: #f8f7f9;
+            --gray-200: #eae7ec;
+            --gray-300: #ddd8df;
+            --gray-400: #c4bdc7;
+            --gray-500: #9e95a1;
+            --gray-600: #6c636f;
+            --gray-700: #4a434d;
+            --gray-800: #342e37;
+            --white: #ffffff;
+            --success: #5a9e6f;
+            --warning: #c9a84c;
+            --danger: #b5545a;
+            --info: #6b8fa8;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.7; color: var(--gray-800); background: var(--gray-100); }
+        .header { background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 50%, var(--primary-light) 100%); color: var(--white); position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 20px rgba(75,45,75,0.25); }
+        .header-top { display: flex; align-items: center; justify-content: space-between; padding: 15px 40px; max-width: 1400px; margin: 0 auto; }
+        .logo-area { display: flex; align-items: center; gap: 20px; }
+        .logo-area svg { height: 48px; width: auto; }
+        .header-badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); padding: 6px 16px; border-radius: 20px; font-size: 12px; letter-spacing: 1px; }
+        .hero { background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 40%, var(--primary-light) 100%); color: var(--white); padding: 60px 40px; text-align: center; position: relative; overflow: hidden; }
+        .hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 60%); animation: pulse 8s ease-in-out infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .hero-content { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; }
+        .hero h1 { font-size: 38px; font-weight: 800; margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .hero .version-badge { display: inline-block; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); padding: 4px 14px; border-radius: 15px; font-size: 13px; margin-bottom: 20px; }
+        .hero p { font-size: 18px; opacity: 0.9; max-width: 700px; margin: 0 auto; }
+        .hero-meta { display: flex; justify-content: center; gap: 20px; margin-top: 30px; flex-wrap: wrap; }
+        .hero-meta-item { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 10px; font-size: 13px; }
+        .hero-meta-item strong { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; margin-bottom: 2px; }
+        .nav-bar { background: var(--white); border-bottom: 2px solid var(--gray-200); padding: 0 40px; position: sticky; top: 78px; z-index: 999; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .nav-bar ul { list-style: none; display: flex; max-width: 1400px; margin: 0 auto; overflow-x: auto; }
+        .nav-bar ul li a { display: block; padding: 14px 20px; color: var(--gray-600); text-decoration: none; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 3px solid transparent; transition: all 0.3s; white-space: nowrap; }
+        .nav-bar ul li a:hover { color: var(--primary); border-bottom-color: var(--primary); background: rgba(123,91,123,0.06); }
+        .main-content { max-width: 1200px; margin: 0 auto; padding: 40px; }
+        .section { background: var(--white); border-radius: 16px; padding: 40px; margin-bottom: 30px; box-shadow: 0 2px 20px rgba(75,45,75,0.06); border: 1px solid var(--gray-200); }
+        .section-header { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid var(--gray-200); }
+        .section-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+        .section-icon.mauve { background: linear-gradient(135deg, var(--primary-light), var(--primary)); color: white; }
+        .section-icon.deep { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; }
+        .section-icon.warm { background: linear-gradient(135deg, #c9a84c, #b8943e); color: white; }
+        .section-icon.plum { background: linear-gradient(135deg, #8e6b8e, #6b3f6b); color: white; }
+        .section-icon.sage { background: linear-gradient(135deg, #7ba88e, #5a9e6f); color: white; }
+        .section-icon.soft { background: linear-gradient(135deg, var(--accent), var(--primary-light)); color: white; }
+        .section-icon.sky { background: linear-gradient(135deg, #6b8fa8, #4a7a95); color: white; }
+        .section-header h2 { font-size: 24px; color: var(--secondary); font-weight: 700; }
+        .section-header h2 small { display: block; font-size: 12px; color: var(--gray-500); font-weight: 400; text-transform: uppercase; letter-spacing: 2px; margin-top: 4px; }
+        .section p { margin-bottom: 15px; color: var(--gray-700); }
+        .highlight-box { background: linear-gradient(135deg, #f5eef5, #faf5fa); border-left: 4px solid var(--primary); padding: 15px 20px; border-radius: 0 10px 10px 0; margin: 20px 0; }
+        .highlight-box.info { background: linear-gradient(135deg, #eee8f0, #f5eff7); border-left-color: var(--info); }
+        .highlight-box.success { background: linear-gradient(135deg, #e8f0eb, #eff5f1); border-left-color: var(--success); }
+        .highlight-box.danger { background: linear-gradient(135deg, #f0e8e9, #f7eff0); border-left-color: var(--danger); }
+        .highlight-box.warning { background: linear-gradient(135deg, #f5f0e0, #faf7ed); border-left-color: var(--warning); }
+        .highlight-box strong { display: block; margin-bottom: 5px; color: var(--gray-800); }
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 20px 0; }
+        .feature-card { background: var(--gray-100); border: 1px solid var(--gray-200); border-radius: 12px; padding: 25px; transition: all 0.3s; }
+        .feature-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(75,45,75,0.12); border-color: var(--primary); }
+        .feature-card .icon { font-size: 28px; margin-bottom: 12px; }
+        .feature-card h4 { color: var(--secondary); margin-bottom: 8px; font-size: 16px; }
+        .feature-card p { font-size: 13px; color: var(--gray-600); margin-bottom: 0; }
+        .vflow { position: relative; padding-left: 60px; margin: 30px 0; }
+        .vflow::before { content: ''; position: absolute; left: 28px; top: 0; bottom: 0; width: 3px; background: linear-gradient(to bottom, var(--primary), var(--secondary), var(--accent)); border-radius: 2px; }
+        .vflow-step { position: relative; margin-bottom: 25px; padding: 20px; background: var(--gray-100); border-radius: 12px; border: 1px solid var(--gray-200); }
+        .vflow-step::before { content: attr(data-step); position: absolute; left: -48px; top: 20px; width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; box-shadow: 0 3px 10px rgba(123,91,123,0.35); z-index: 2; }
+        .vflow-step h4 { color: var(--secondary); margin-bottom: 8px; font-size: 16px; }
+        .vflow-step p { font-size: 14px; color: var(--gray-600); margin-bottom: 0; }
+        .table-responsive { overflow-x: auto; margin: 20px 0; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        table thead th { background: var(--secondary); color: var(--white); padding: 12px 16px; text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        table thead th:first-child { border-radius: 10px 0 0 0; }
+        table thead th:last-child { border-radius: 0 10px 0 0; }
+        table tbody td { padding: 12px 16px; border-bottom: 1px solid var(--gray-200); }
+        table tbody tr:hover { background: var(--gray-100); }
+        table tbody tr:last-child td:first-child { border-radius: 0 0 0 10px; }
+        table tbody tr:last-child td:last-child { border-radius: 0 0 10px 0; }
+        table tbody td code { background: #eae7ec; padding: 2px 7px; border-radius: 4px; font-size: 13px; color: var(--primary-dark); }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge-complete { background: #dce8e0; color: #2a5a3a; }
+        .badge-partial { background: #f0e8d4; color: #7a6530; }
+        .badge-pending { background: #f0dfe0; color: #7a3035; }
+        .badge-info { background: #dce8ef; color: #3a5f75; }
+        .badge-ic { background: #e5dae5; color: #5E3F5E; }
+        .eco-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 25px 0; }
+        .eco-card { border: 2px solid var(--gray-300); border-radius: 16px; padding: 25px; text-align: center; transition: all 0.3s; }
+        .eco-card:hover { border-color: var(--primary); box-shadow: 0 8px 25px rgba(75,45,75,0.12); }
+        .eco-card h4 { color: var(--secondary); margin-bottom: 8px; font-size: 15px; }
+        .eco-card .eco-icon { font-size: 36px; margin-bottom: 12px; }
+        .eco-card p { font-size: 12px; color: var(--gray-600); margin-bottom: 0; }
+        .eco-card.orders { border-color: var(--primary); background: linear-gradient(135deg, #f5eef5, #ede4ed); }
+        .eco-card.products { border-color: var(--info); background: linear-gradient(135deg, #f0f5f8, #e8eff3); }
+        .eco-card.kitchen { border-color: var(--warning); background: linear-gradient(135deg, #f8f4e8, #f5f0dd); }
+        .flow-horizontal { display: flex; align-items: center; justify-content: center; gap: 0; margin: 30px 0; flex-wrap: nowrap; overflow-x: auto; padding: 15px 0; }
+        .flow-box { min-width: 140px; padding: 18px; border-radius: 12px; text-align: center; font-size: 13px; font-weight: 600; color: white; flex-shrink: 0; }
+        .flow-box.co-a { background: linear-gradient(135deg, var(--info), #4a7a95); }
+        .flow-box.process { background: linear-gradient(135deg, var(--primary), var(--secondary)); }
+        .flow-box.co-b { background: linear-gradient(135deg, var(--success), #4a8e5f); }
+        .flow-box.alert { background: linear-gradient(135deg, var(--warning), #b89a3e); }
+        .flow-box.return { background: linear-gradient(135deg, var(--danger), #a5444a); }
+        .flow-box small { display: block; font-weight: 400; font-size: 11px; margin-top: 4px; opacity: 0.9; }
+        .faq-item { border: 1px solid var(--gray-200); border-radius: 12px; margin-bottom: 12px; overflow: hidden; transition: all 0.3s; }
+        .faq-item:hover { border-color: var(--primary); box-shadow: 0 4px 15px rgba(123,91,123,0.12); }
+        .faq-question { padding: 18px 20px; background: var(--gray-100); font-weight: 700; color: var(--secondary); display: flex; align-items: center; gap: 12px; }
+        .faq-question .q-marker { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; flex-shrink: 0; }
+        .faq-answer { padding: 18px 20px; padding-left: 60px; color: var(--gray-700); font-size: 14px; border-top: 1px solid var(--gray-200); }
+        .group-card { display: flex; align-items: flex-start; gap: 15px; padding: 20px; background: var(--gray-100); border-radius: 12px; margin: 10px 0; }
+        .group-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+        .group-icon.user { background: linear-gradient(135deg, var(--primary-light), var(--primary)); color: white; }
+        .group-icon.admin { background: linear-gradient(135deg, var(--primary-dark), var(--secondary)); color: white; }
+        .code-block { background: var(--dark); color: #e2e0e6; padding: 18px 22px; border-radius: 10px; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.8; overflow-x: auto; margin: 14px 0; }
+        .code-block .kw { color: var(--accent); }
+        .code-block .val { color: #8fc98f; }
+        .footer { background: var(--dark); color: var(--gray-500); padding: 40px; text-align: center; }
+        .footer .company-name { font-size: 22px; font-weight: 800; color: var(--white); letter-spacing: 3px; margin-bottom: 5px; }
+        .footer .tagline { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; }
+        .footer-divider { width: 60px; height: 3px; background: var(--primary); margin: 20px auto; border-radius: 2px; }
+        .footer p { font-size: 13px; margin-bottom: 5px; }
+        .timer-demo { background: #1a1a2e; border-radius: 16px; padding: 30px; text-align: center; margin: 25px 0; }
+        .timer-demo .timer-display { font-family: 'Courier New', monospace; font-size: 48px; color: #4ade80; margin-bottom: 20px; text-shadow: 0 0 20px rgba(74,222,128,0.3); }
+        .timer-demo .timer-display.paused { color: #facc15; animation: blink 1s step-end infinite; }
+        .timer-demo .timer-display.stopped { color: #94a3b8; }
+        .timer-demo .timer-label { color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; }
+        .timer-demo .timer-buttons { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+        .timer-demo .timer-btn { padding: 10px 24px; border-radius: 8px; border: none; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .timer-btn.start { background: #22c55e; color: white; }
+        .timer-btn.pause { background: #eab308; color: #1a1a2e; }
+        .timer-btn.stop { background: #ef4444; color: white; }
+        .timer-btn.resume { background: #3b82f6; color: white; }
+        @keyframes blink { 50% { opacity: 0.4; } }
+        .pause-reasons-visual { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
+        .pause-reason-card { background: var(--gray-100); border: 2px solid var(--gray-300); border-radius: 12px; padding: 18px; display: flex; align-items: center; gap: 14px; transition: all 0.3s; }
+        .pause-reason-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(75,45,75,0.1); }
+        .pause-reason-card .reason-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+        .pause-reason-card .reason-text { font-weight: 600; color: var(--secondary); font-size: 14px; }
+        .pause-reason-card .reason-desc { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+        .process-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; margin: 2px; }
+        .process-badge.in { background: #dbeafe; color: #1e40af; }
+        .process-badge.int { background: #fef3c7; color: #92400e; }
+        .process-badge.pick { background: #ede9fe; color: #5b21b6; }
+        .process-badge.pack { background: #fce7f3; color: #9d174d; }
+        .process-badge.out { background: #d1fae5; color: #065f46; }
+        @media (max-width: 768px) {
+            .header-top { padding: 10px 20px; } .hero { padding: 30px 20px; } .hero h1 { font-size: 26px; }
+            .nav-bar { padding: 0 15px; } .main-content { padding: 20px; } .section { padding: 25px; }
+            .eco-grid { grid-template-columns: 1fr; } .flow-horizontal { flex-direction: column; }
+            .pause-reasons-visual { grid-template-columns: 1fr; }
+        }
+        @media print { .header, .nav-bar { position: static; } .section { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; } }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <div class="header-top">
+        <div class="logo-area">
+            <svg viewBox="0 0 240 48" xmlns="http://www.w3.org/2000/svg">
+                <defs><linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#9B7B9B"/><stop offset="100%" style="stop-color:#C9A0C9"/></linearGradient></defs>
+                <rect x="0" y="4" width="40" height="40" rx="10" fill="url(#logoGrad)"/>
+                <text x="20" y="32" font-family="Arial,sans-serif" font-size="26" font-weight="800" fill="white" text-anchor="middle">C</text>
+                <text x="52" y="22" font-family="Arial,sans-serif" font-size="18" font-weight="800" fill="white" letter-spacing="2">COONDEV</text>
+                <text x="52" y="38" font-family="Arial,sans-serif" font-size="8" fill="rgba(255,255,255,0.8)" letter-spacing="2">COONSULTING &amp; DEVELOPMENT</text>
+            </svg>
+        </div>
+        <div class="header-badge">GUIA FUNCIONAL v1.0</div>
+    </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+    <div class="hero-content">
+        <div class="version-badge">Odoo 16 &bull; Modulo de Codigo de Barras</div>
+        <h1>Cronometro para Modulo de Barras</h1>
+        <p>Control de tiempos en todas las operaciones logisticas del modulo de codigo de barras. Inicio, pausa con motivo, reanudacion y detencion del cronometro en IN, INT, PICK, PACK y OUT.</p>
+        <div class="hero-meta">
+            <div class="hero-meta-item"><strong>Version</strong>16.0.1.0.0</div>
+            <div class="hero-meta-item"><strong>Modulo</strong>stock_barcode_timer</div>
+            <div class="hero-meta-item"><strong>Autor</strong>Coondev</div>
+            <div class="hero-meta-item"><strong>Dependencias</strong>stock_barcode, stock_standing</div>
+        </div>
+    </div>
+</div>
+
+<!-- NAVIGATION -->
+<div class="nav-bar">
+    <ul>
+        <li><a href="#introduccion">Introduccion</a></li>
+        <li><a href="#requisitos">Requisitos</a></li>
+        <li><a href="#instalacion">Instalacion</a></li>
+        <li><a href="#cronometro">Cronometro</a></li>
+        <li><a href="#pausas">Motivos de Pausa</a></li>
+        <li><a href="#operacion">Operacion</a></li>
+        <li><a href="#procesos">Procesos</a></li>
+        <li><a href="#configuracion">Configuracion</a></li>
+        <li><a href="#tecnico">Tecnico</a></li>
+        <li><a href="#faq">FAQ</a></li>
+    </ul>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
+    <!-- 1. INTRODUCCION -->
+    <div class="section" id="introduccion">
+        <div class="section-header">
+            <div class="section-icon mauve">&#128214;</div>
+            <h2>1. Introduccion <small>Vision general del modulo</small></h2>
+        </div>
+        <p>El modulo <strong>stock_barcode_timer</strong> extiende el modulo de codigo de barras de Odoo 16 para incorporar un <strong>cronometro de control de tiempos</strong> en todas las operaciones logisticas de movimiento de material.</p>
+
+        <div class="highlight-box info">
+            <strong>&#9432; Que resuelve este modulo?</strong>
+            En las operaciones de bodega, es fundamental medir los tiempos de cada proceso logistico: recepcion de material (IN), transferencias internas (INT), picking (PICK), empaquetado (PACK) y despacho (OUT). Este modulo permite al operario iniciar un cronometro al comenzar su labor, pausarlo cuando hay interrupciones (registrando el motivo), reanudarlo y detenerlo al finalizar. Toda la informacion queda registrada con trazabilidad completa.
+        </div>
+
+        <h3 style="margin: 25px 0 15px; color: var(--secondary);">Procesos Logisticos Cubiertos</h3>
+        <div style="text-align: center; margin: 20px 0;">
+            <span class="process-badge in">IN - Recepcion</span>
+            <span class="process-badge int">INT - Transferencia Interna</span>
+            <span class="process-badge pick">PICK - Picking</span>
+            <span class="process-badge pack">PACK - Empaquetado</span>
+            <span class="process-badge out">OUT - Despacho</span>
+        </div>
+
+        <h3 style="margin: 25px 0 15px; color: var(--secondary);">Capacidades Principales</h3>
+        <div class="eco-grid">
+            <div class="eco-card orders">
+                <div class="eco-icon">&#9201;</div>
+                <h4>Cronometro Integrado</h4>
+                <p>Widget visual en la interfaz de codigo de barras con display HH:MM:SS en tiempo real. Botones de Iniciar, Pausar, Reanudar y Detener.</p>
+            </div>
+            <div class="eco-card products">
+                <div class="eco-icon">&#9208;</div>
+                <h4>Pausas con Motivo</h4>
+                <p>Al pausar, se presenta un dialogo con 6 motivos predefinidos y campo de nota adicional. Cada pausa queda registrada con usuario, fecha y motivo.</p>
+            </div>
+            <div class="eco-card kitchen">
+                <div class="eco-icon">&#128202;</div>
+                <h4>Registro y Trazabilidad</h4>
+                <p>Log completo de todos los eventos del cronometro: inicios, pausas, reanudaciones y detenciones. Visible en la pestana "Cronometro" del picking.</p>
+            </div>
+        </div>
+
+        <h3 style="margin: 25px 0 15px; color: var(--secondary);">Funcionalidades Detalladas</h3>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="icon">&#9654;</div>
+                <h4>Iniciar Cronometro</h4>
+                <p>Inicia la medicion del tiempo al comenzar a trabajar en una transferencia desde el modulo de barras.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">&#9208;</div>
+                <h4>Pausar con Motivo</h4>
+                <p>Detiene temporalmente el cronometro. El operario debe seleccionar un motivo de pausa obligatorio.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">&#9654;</div>
+                <h4>Reanudar</h4>
+                <p>Continua el cronometro despues de una pausa, sin perder el tiempo acumulado previamente.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">&#9632;</div>
+                <h4>Detener</h4>
+                <p>Finaliza el cronometro definitivamente. El tiempo total queda registrado en el picking.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">&#128203;</div>
+                <h4>Log de Eventos</h4>
+                <p>Cada accion genera un registro con timestamp, usuario, tipo de evento y tiempo transcurrido.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">&#128260;</div>
+                <h4>Sincronizacion</h4>
+                <p>Se sincroniza con los campos del modulo stock_standing para mantener compatibilidad con el formulario de picking.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. REQUISITOS -->
+    <div class="section" id="requisitos">
+        <div class="section-header">
+            <div class="section-icon sage">&#9989;</div>
+            <h2>2. Requisitos Previos <small>Lo que necesitas antes de empezar</small></h2>
+        </div>
+
+        <h3 style="margin-bottom: 15px; color: var(--secondary);">2.1 Modulos de Odoo Requeridos</h3>
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>Modulo</th><th>Nombre Tecnico</th><th>Para que se usa</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>Codigo de Barras (Enterprise)</strong></td><td><code>stock_barcode</code></td><td>Modulo base de escaneo de barras para operaciones de inventario</td></tr>
+                    <tr><td><strong>Stock Standing</strong></td><td><code>stock_standing</code></td><td>Campos complementarios de cronometro y flete en el picking</td></tr>
+                    <tr><td><strong>Inventario</strong></td><td><code>stock</code></td><td>Operaciones base de inventario y transferencias</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">2.2 Requisitos del Sistema</h3>
+        <div class="feature-grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="feature-card">
+                <h4>Odoo 16 Enterprise</h4>
+                <p>Se requiere la version Enterprise de Odoo 16 ya que el modulo <code>stock_barcode</code> es un modulo Enterprise.</p>
+            </div>
+            <div class="feature-card">
+                <h4>Dispositivo con Escaner</h4>
+                <p>Tablet, celular o computador con camara o escaner de codigo de barras conectado para la operacion en bodega.</p>
+            </div>
+        </div>
+
+        <div class="highlight-box success">
+            <strong>&#128161; Nota</strong>
+            El modulo <code>stock_standing</code> ya debe estar instalado previamente. Este modulo aporta los campos base del cronometro (<code>cronometro_inicial</code>, <code>cronometro_acumulado</code>, <code>cronometro_estado</code>) que se sincronizan automaticamente.
+        </div>
+    </div>
+
+    <!-- 3. INSTALACION -->
+    <div class="section" id="instalacion">
+        <div class="section-header">
+            <div class="section-icon deep">&#128230;</div>
+            <h2>3. Instalacion <small>Como instalar el modulo en Odoo</small></h2>
+        </div>
+        <div class="vflow">
+            <div class="vflow-step" data-step="1">
+                <h4>Copiar el modulo al servidor</h4>
+                <p>Copie la carpeta <code>stock_barcode_timer</code> al directorio de addons personalizados de su instancia de Odoo 16.</p>
+            </div>
+            <div class="vflow-step" data-step="2">
+                <h4>Actualizar lista de aplicaciones</h4>
+                <p>Vaya a <strong>Aplicaciones &gt; Actualizar lista de aplicaciones</strong> y confirme la actualizacion.</p>
+            </div>
+            <div class="vflow-step" data-step="3">
+                <h4>Buscar el modulo</h4>
+                <p>En la barra de busqueda de Aplicaciones, escriba <strong>"Barcode Timer"</strong> o <strong>"Cronometro"</strong>.</p>
+            </div>
+            <div class="vflow-step" data-step="4">
+                <h4>Instalar</h4>
+                <p>Localice <strong>"Barcode Picking Timer / Cronometro"</strong> (autor: Coondev) y haga clic en <strong>Instalar</strong>. Se cargaran automaticamente los 6 motivos de pausa predefinidos.</p>
+            </div>
+        </div>
+
+        <div class="highlight-box warning">
+            <strong>&#9888; Importante</strong>
+            Asegurese de que los modulos <code>stock_barcode</code> (Enterprise) y <code>stock_standing</code> esten instalados previamente. Si faltan dependencias, Odoo mostrara un error durante la instalacion.
+        </div>
+    </div>
+
+    <!-- 4. CRONOMETRO -->
+    <div class="section" id="cronometro">
+        <div class="section-header">
+            <div class="section-icon warm">&#9201;</div>
+            <h2>4. El Cronometro <small>Interfaz visual y estados</small></h2>
+        </div>
+
+        <p>El cronometro aparece en la <strong>parte superior</strong> de la vista de codigo de barras, justo encima del area de escaneo. Es visible en todos los tipos de transferencia.</p>
+
+        <h3 style="margin: 25px 0 15px; color: var(--secondary);">Vista del Cronometro - Estado: EN CURSO</h3>
+        <div class="timer-demo">
+            <div class="timer-label">Cronometro de Operacion</div>
+            <div class="timer-display">00:14:32</div>
+            <div class="timer-buttons">
+                <button class="timer-btn pause">&#9208; Pausa</button>
+                <button class="timer-btn stop">&#9632; Detener</button>
+            </div>
+        </div>
+
+        <h3 style="margin: 25px 0 15px; color: var(--secondary);">Vista del Cronometro - Estado: PAUSADO</h3>
+        <div class="timer-demo">
+            <div class="timer-label">Cronometro de Operacion</div>
+            <div class="timer-display paused">00:14:32</div>
+            <div class="timer-buttons">
+                <button class="timer-btn resume">&#9654; Reanudar</button>
+                <button class="timer-btn stop">&#9632; Detener</button>
+            </div>
+        </div>
+
+        <h3 style="margin: 25px 0 15px; color: var(--secondary);">Vista del Cronometro - Estado: DETENIDO</h3>
+        <div class="timer-demo">
+            <div class="timer-label">Cronometro de Operacion</div>
+            <div class="timer-display stopped">00:00:00</div>
+            <div class="timer-buttons">
+                <button class="timer-btn start">&#9654; Iniciar</button>
+            </div>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">Estados del Cronometro</h3>
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>Estado</th><th>Color del Display</th><th>Botones Visibles</th><th>Descripcion</th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td><span class="badge badge-info">Detenido</span></td>
+                        <td>Gris</td>
+                        <td><strong>Iniciar</strong></td>
+                        <td>Estado inicial. El cronometro no ha comenzado o ya fue finalizado.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-complete">En Curso</span></td>
+                        <td>Verde</td>
+                        <td><strong>Pausa</strong> + <strong>Detener</strong></td>
+                        <td>El cronometro esta corriendo. El display se actualiza cada segundo.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-partial">Pausado</span></td>
+                        <td>Amarillo (parpadeo)</td>
+                        <td><strong>Reanudar</strong> + <strong>Detener</strong></td>
+                        <td>El cronometro esta pausado. El tiempo NO se acumula durante la pausa.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">Flujo de Estados</h3>
+        <div class="flow-horizontal">
+            <div class="flow-box co-a">&#9632; Detenido<small>Estado inicial</small></div>
+            <div class="flow-arrow">&#10230;</div>
+            <div class="flow-box co-b">&#9654; En Curso<small>Boton "Iniciar"</small></div>
+            <div class="flow-arrow">&#10230;</div>
+            <div class="flow-box alert">&#9208; Pausado<small>Boton "Pausa"</small></div>
+            <div class="flow-arrow">&#10230;</div>
+            <div class="flow-box process">&#9654; En Curso<small>Boton "Reanudar"</small></div>
+            <div class="flow-arrow">&#10230;</div>
+            <div class="flow-box return">&#9632; Detenido<small>Boton "Detener"</small></div>
+        </div>
+
+        <div class="highlight-box info">
+            <strong>&#9432; Formato del tiempo</strong>
+            El cronometro muestra el tiempo en formato <strong>HH:MM:SS</strong> (horas:minutos:segundos). El tiempo solo se acumula mientras el estado es "En Curso". Las pausas no suman tiempo al total.
+        </div>
+    </div>
+
+    <!-- 5. MOTIVOS DE PAUSA -->
+    <div class="section" id="pausas">
+        <div class="section-header">
+            <div class="section-icon plum">&#9208;</div>
+            <h2>5. Motivos de Pausa <small>Razones predefinidas para interrupciones</small></h2>
+        </div>
+
+        <p>Al presionar el boton <strong>"Pausa"</strong>, se abre un dialogo donde el operario <strong>debe seleccionar obligatoriamente</strong> el motivo de la interrupcion. Esto garantiza trazabilidad y permite analizar las causas de demora.</p>
+
+        <h3 style="margin: 25px 0 15px; color: var(--secondary);">Motivos Predefinidos</h3>
+        <div class="pause-reasons-visual">
+            <div class="pause-reason-card">
+                <div class="reason-icon" style="background: linear-gradient(135deg, #6b8fa8, #4a7a95); color: white;">&#128101;</div>
+                <div>
+                    <div class="reason-text">Por instruccion del supervisor</div>
+                    <div class="reason-desc">El supervisor indico que se detenga la operacion temporalmente</div>
+                </div>
+            </div>
+            <div class="pause-reason-card">
+                <div class="reason-icon" style="background: linear-gradient(135deg, #c9a84c, #b8943e); color: white;">&#9889;</div>
+                <div>
+                    <div class="reason-text">Por alistamiento de otro pedido con prioridad</div>
+                    <div class="reason-desc">Se debe atender un pedido urgente o de mayor prioridad</div>
+                </div>
+            </div>
+            <div class="pause-reason-card">
+                <div class="reason-icon" style="background: linear-gradient(135deg, #5a9e6f, #4a8e5f); color: white;">&#128230;</div>
+                <div>
+                    <div class="reason-text">Por recepcion de material</div>
+                    <div class="reason-desc">Llego material que requiere atencion inmediata en recepcion</div>
+                </div>
+            </div>
+            <div class="pause-reason-card">
+                <div class="reason-icon" style="background: linear-gradient(135deg, #b5545a, #a5444a); color: white;">&#9888;</div>
+                <div>
+                    <div class="reason-text">Falla maquina</div>
+                    <div class="reason-desc">Equipo de manejo de material o escaner presento una falla tecnica</div>
+                </div>
+            </div>
+            <div class="pause-reason-card">
+                <div class="reason-icon" style="background: linear-gradient(135deg, #8e6b8e, #6b3f6b); color: white;">&#9749;</div>
+                <div>
+                    <div class="reason-text">Por break y/o almuerzo</div>
+                    <div class="reason-desc">Pausa programada por descanso o periodo de alimentacion</div>
+                </div>
+            </div>
+            <div class="pause-reason-card">
+                <div class="reason-icon" style="background: linear-gradient(135deg, #7B5B7B, #5E3F5E); color: white;">&#128682;</div>
+                <div>
+                    <div class="reason-text">Por salida de turno</div>
+                    <div class="reason-desc">Finalizacion del turno del operario actual</div>
+                </div>
+            </div>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">Dialogo de Pausa</h3>
+        <p>Cuando el operario pulsa <strong>"Pausa"</strong>, aparece el siguiente dialogo:</p>
+        <div class="vflow">
+            <div class="vflow-step" data-step="1">
+                <h4>Seleccionar motivo</h4>
+                <p>Se muestran los 6 motivos predefinidos como botones seleccionables. El operario debe elegir <strong>uno obligatoriamente</strong>. El motivo seleccionado se resalta visualmente.</p>
+            </div>
+            <div class="vflow-step" data-step="2">
+                <h4>Nota adicional (opcional)</h4>
+                <p>Debajo de los motivos hay un campo de texto libre donde el operario puede escribir una nota adicional con mas detalle sobre la pausa.</p>
+            </div>
+            <div class="vflow-step" data-step="3">
+                <h4>Confirmar pausa</h4>
+                <p>Al pulsar <strong>"Confirmar Pausa"</strong>, el cronometro se pausa, se registra el evento con el motivo y nota, y se muestra el estado "PAUSADO" con parpadeo amarillo.</p>
+            </div>
+        </div>
+
+        <div class="highlight-box danger">
+            <strong>&#128308; Obligatorio</strong>
+            No es posible pausar el cronometro sin seleccionar un motivo. El boton "Confirmar Pausa" permanece deshabilitado hasta que se elija una razon.
+        </div>
+
+        <div class="highlight-box success">
+            <strong>&#128161; Motivos personalizables</strong>
+            Los motivos de pausa son configurables. Un administrador puede agregar, editar o desactivar motivos desde <em>Inventario &gt; Configuracion &gt; Motivos de Pausa Cronometro</em>.
+        </div>
+    </div>
+
+    <!-- 6. OPERACION DIARIA -->
+    <div class="section" id="operacion">
+        <div class="section-header">
+            <div class="section-icon soft">&#128736;</div>
+            <h2>6. Operacion Diaria <small>Como usar el cronometro paso a paso</small></h2>
+        </div>
+
+        <h3 style="margin-bottom: 15px; color: var(--secondary);">6.1 Flujo Tipico de Uso</h3>
+        <div class="vflow">
+            <div class="vflow-step" data-step="1">
+                <h4>Abrir la transferencia en el modulo de barras</h4>
+                <p>Desde el modulo de <strong>Codigo de Barras</strong>, abra la transferencia (IN, INT, PICK, PACK u OUT) que va a procesar. El cronometro aparecera en la parte superior en estado <strong>"Detenido"</strong>.</p>
+            </div>
+            <div class="vflow-step" data-step="2">
+                <h4>Iniciar el cronometro</h4>
+                <p>Pulse el boton verde <strong>"Iniciar"</strong>. El display cambiara a color verde y comenzara a contar el tiempo en formato HH:MM:SS. El estado cambia a <strong>"EN CURSO"</strong>.</p>
+            </div>
+            <div class="vflow-step" data-step="3">
+                <h4>Realizar la operacion normalmente</h4>
+                <p>Escanee productos, ubique material, empaque, etc. El cronometro sigue corriendo en la parte superior sin interferir con la operacion.</p>
+            </div>
+            <div class="vflow-step" data-step="4">
+                <h4>Pausar si es necesario</h4>
+                <p>Si necesita interrumpir la operacion, pulse <strong>"Pausa"</strong>. Seleccione el motivo de la interrupcion en el dialogo que aparece y confirme. El cronometro se detiene temporalmente (display amarillo parpadeante).</p>
+            </div>
+            <div class="vflow-step" data-step="5">
+                <h4>Reanudar al volver</h4>
+                <p>Cuando retome la operacion, pulse <strong>"Reanudar"</strong>. El cronometro continua desde donde se detuvo, sin contar el tiempo de la pausa.</p>
+            </div>
+            <div class="vflow-step" data-step="6">
+                <h4>Detener al finalizar</h4>
+                <p>Al completar toda la operacion, pulse <strong>"Detener"</strong>. El tiempo total queda registrado en el picking. Puede validar la transferencia normalmente.</p>
+            </div>
+        </div>
+
+        <h3 style="margin: 35px 0 15px; color: var(--secondary);">6.2 Ver el Registro del Cronometro</h3>
+        <p>Todo el historial de eventos del cronometro se puede consultar desde el formulario del picking:</p>
+        <div class="vflow">
+            <div class="vflow-step" data-step="1">
+                <h4>Abrir el picking en vista formulario</h4>
+                <p>Vaya a <strong>Inventario</strong> y abra la transferencia correspondiente (por ejemplo, <code>BD22/IN/00280</code>).</p>
+            </div>
+            <div class="vflow-step" data-step="2">
+                <h4>Ir a la pestana "Cronometro"</h4>
+                <p>En el formulario del picking, haga clic en la pestana <strong>"Cronometro"</strong>. Vera el estado actual, tiempo total formateado y numero de pausas.</p>
+            </div>
+            <div class="vflow-step" data-step="3">
+                <h4>Revisar el log de eventos</h4>
+                <p>Debajo de los campos resumen se muestra una tabla con todos los eventos: fecha/hora, tipo (inicio, pausa, reanudacion, detencion), motivo de pausa, nota y usuario responsable.</p>
+            </div>
+        </div>
+
+        <div class="highlight-box info">
+            <strong>&#9432; Datos de la pestana Cronometro</strong>
+            <ul style="margin-top:6px; padding-left:18px;">
+                <li><strong>Estado:</strong> Detenido / En curso / Pausado</li>
+                <li><strong>Tiempo Total:</strong> Formato HH:MM:SS del tiempo efectivo de trabajo</li>
+                <li><strong>Numero de Pausas:</strong> Cantidad total de veces que se pauso el cronometro</li>
+                <li><strong>Log:</strong> Tabla detallada con cada evento registrado</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 7. PROCESOS LOGISTICOS -->
+    <div class="section" id="procesos">
+        <div class="section-header">
+            <div class="section-icon sky">&#128666;</div>
+            <h2>7. Procesos Logisticos <small>Aplicacion en cada etapa</small></h2>
+        </div>
+
+        <p>El cronometro funciona en <strong>todas las etapas</strong> del proceso logistico. A continuacion se detalla como aplica en cada una:</p>
+
+        <div class="flow-horizontal">
+            <div class="flow-box co-a">&#128230; IN<small>Recepcion</small></div>
+            <div class="flow-arrow">&#10230;</div>
+            <div class="flow-box process">&#128260; INT<small>Transferencia</small></div>
+            <div class="flow-arrow">&#10230;</div>
+            <div class="flow-box alert">&#128269; PICK<small>Picking</small></div>
+            <div class="flow-arrow">&#10230;</div>
+            <div class="flow-box co-b">&#128230; PACK<small>Empaquetado</small></div>
+            <div class="flow-arrow">&#10230;</div>
+            <div class="flow-box return">&#128666; OUT<small>Despacho</small></div>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">7.1 IN - Recepcion de Material</h3>
+        <div class="feature-grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="feature-card">
+                <div class="icon">&#128230;</div>
+                <h4>Que se mide</h4>
+                <p>Tiempo total de recepcion: desde que se comienza a escanear el material entrante hasta que se completa la validacion de la recepcion.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">&#9201;</div>
+                <h4>Cuando iniciar</h4>
+                <p>Al abrir la transferencia IN en el modulo de barras y comenzar a escanear los productos recibidos.</p>
+            </div>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">7.2 INT - Transferencia Interna</h3>
+        <div class="feature-grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="feature-card">
+                <div class="icon">&#128260;</div>
+                <h4>Que se mide</h4>
+                <p>Tiempo de movimiento interno de material entre ubicaciones de la bodega. Incluye el traslado fisico.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">&#9201;</div>
+                <h4>Cuando iniciar</h4>
+                <p>Al escanear la ubicacion origen y comenzar el movimiento de material hacia la ubicacion destino.</p>
+            </div>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">7.3 PICK - Picking</h3>
+        <div class="feature-grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="feature-card">
+                <div class="icon">&#128269;</div>
+                <h4>Que se mide</h4>
+                <p>Tiempo de recoleccion de productos para preparar un pedido. Desde la primera ubicacion hasta completar todas las lineas.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">&#9201;</div>
+                <h4>Cuando iniciar</h4>
+                <p>Al comenzar la ruta de picking, cuando se escanea la primera ubicacion origen del pedido.</p>
+            </div>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">7.4 PACK - Empaquetado</h3>
+        <div class="feature-grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="feature-card">
+                <div class="icon">&#128230;</div>
+                <h4>Que se mide</h4>
+                <p>Tiempo de empaquetado: desde que se comienza a escanear productos para empacar hasta completar todos los paquetes.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">&#9201;</div>
+                <h4>Cuando iniciar</h4>
+                <p>Al abrir la operacion de empaquetado y comenzar a asignar productos a paquetes.</p>
+            </div>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">7.5 OUT - Despacho</h3>
+        <div class="feature-grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="feature-card">
+                <div class="icon">&#128666;</div>
+                <h4>Que se mide</h4>
+                <p>Tiempo de despacho: desde que se prepara la salida del material hasta que se valida la transferencia de salida.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">&#9201;</div>
+                <h4>Cuando iniciar</h4>
+                <p>Al abrir la transferencia OUT en barras y comenzar la verificacion de material para despacho.</p>
+            </div>
+        </div>
+
+        <div class="highlight-box success">
+            <strong>&#128161; Consejo Operativo</strong>
+            Se recomienda que el operario inicie el cronometro <strong>inmediatamente al abrir la transferencia</strong> en el modulo de barras y lo detenga solo al finalizar completamente la operacion. Esto garantiza una medicion precisa del tiempo efectivo de trabajo.
+        </div>
+    </div>
+
+    <!-- 8. CONFIGURACION -->
+    <div class="section" id="configuracion">
+        <div class="section-header">
+            <div class="section-icon warm">&#9881;</div>
+            <h2>8. Configuracion <small>Administrar motivos de pausa y permisos</small></h2>
+        </div>
+
+        <h3 style="margin-bottom: 15px; color: var(--secondary);">8.1 Gestionar Motivos de Pausa</h3>
+        <div class="vflow">
+            <div class="vflow-step" data-step="1">
+                <h4>Acceder a la configuracion</h4>
+                <p>Vaya a <strong>Inventario &gt; Configuracion &gt; Motivos de Pausa Cronometro</strong>. Se muestra una lista editable con todos los motivos.</p>
+            </div>
+            <div class="vflow-step" data-step="2">
+                <h4>Agregar un nuevo motivo</h4>
+                <p>Haga clic en <strong>"Agregar una linea"</strong>. Escriba el nombre del nuevo motivo. Se agrega con secuencia automatica y estado activo.</p>
+            </div>
+            <div class="vflow-step" data-step="3">
+                <h4>Ordenar motivos</h4>
+                <p>Use el icono de arrastre (&#9776;) a la izquierda de cada motivo para cambiar el orden en que aparecen en el dialogo de pausa.</p>
+            </div>
+            <div class="vflow-step" data-step="4">
+                <h4>Desactivar un motivo</h4>
+                <p>Desmarque la casilla <strong>"Activo"</strong> de cualquier motivo para ocultarlo del dialogo de pausa sin eliminarlo. Se puede reactivar en cualquier momento.</p>
+            </div>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">8.2 Permisos y Seguridad</h3>
+        <div class="group-card">
+            <div class="group-icon user">&#128100;</div>
+            <div>
+                <h4 style="color: var(--secondary); margin-bottom: 5px;">Usuario de Inventario (stock.group_stock_user)</h4>
+                <p style="font-size: 13px; color: var(--gray-600); margin-bottom: 0;">Puede <strong>usar</strong> el cronometro desde el modulo de barras (iniciar, pausar, reanudar, detener). Puede <strong>ver</strong> los motivos de pausa y los registros del cronometro. <strong>No puede</strong> crear ni modificar motivos de pausa.</p>
+            </div>
+        </div>
+        <div class="group-card">
+            <div class="group-icon admin">&#128272;</div>
+            <div>
+                <h4 style="color: var(--secondary); margin-bottom: 5px;">Responsable de Inventario (stock.group_stock_manager)</h4>
+                <p style="font-size: 13px; color: var(--gray-600); margin-bottom: 0;">Acceso completo: puede <strong>crear, editar y eliminar</strong> motivos de pausa. Puede consultar y exportar todos los registros del cronometro de cualquier operario. Puede ver reportes de tiempos.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 9. REFERENCIA TECNICA -->
+    <div class="section" id="tecnico">
+        <div class="section-header">
+            <div class="section-icon sky">&#128451;</div>
+            <h2>9. Referencia Tecnica <small>Modelos, campos y arquitectura</small></h2>
+        </div>
+
+        <h3 style="margin-bottom: 15px; color: var(--secondary);">9.1 Modelos Propios</h3>
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>Modelo</th><th>Descripcion</th><th>Campos principales</th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td><code>cronometro.pause.reason</code></td>
+                        <td>Catalogo de motivos de pausa configurables. Se muestran en el dialogo de pausa del modulo de barras.</td>
+                        <td><code>name</code> (Char), <code>sequence</code> (Integer), <code>active</code> (Boolean)</td>
+                    </tr>
+                    <tr>
+                        <td><code>cronometro.log</code></td>
+                        <td>Registro de cada evento del cronometro (inicio, pausa, reanudacion, detencion) con trazabilidad completa.</td>
+                        <td><code>picking_id</code>, <code>event_type</code> (Selection), <code>pause_reason_id</code>, <code>pause_reason_note</code>, <code>timestamp</code>, <code>elapsed_seconds</code>, <code>user_id</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">9.2 Modelo Extendido: stock.picking</h3>
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>Campo</th><th>Tipo</th><th>Descripcion</th></tr></thead>
+                <tbody>
+                    <tr><td><code>cronometro_timer_state</code></td><td>Selection</td><td>Estado actual: <code>stopped</code>, <code>running</code>, <code>paused</code></td></tr>
+                    <tr><td><code>cronometro_last_start</code></td><td>Float</td><td>Timestamp UNIX del ultimo inicio/reanudacion</td></tr>
+                    <tr><td><code>cronometro_total_seconds</code></td><td>Float</td><td>Tiempo total acumulado en segundos (sin contar pausas)</td></tr>
+                    <tr><td><code>cronometro_total_formato</code></td><td>Char (computed)</td><td>Tiempo formateado como HH:MM:SS</td></tr>
+                    <tr><td><code>cronometro_log_ids</code></td><td>One2many</td><td>Relacion con los registros del cronometro</td></tr>
+                    <tr><td><code>cronometro_pause_count</code></td><td>Integer (computed)</td><td>Cantidad total de pausas registradas</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">9.3 Metodos del Servidor (API)</h3>
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>Metodo</th><th>Parametros</th><th>Retorno</th><th>Descripcion</th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td><code>action_timer_start()</code></td>
+                        <td>Ninguno</td>
+                        <td><code>{status, state, total_seconds, last_start}</code></td>
+                        <td>Inicia o reanuda el cronometro. Crea log de tipo 'start' o 'resume'. Sincroniza con stock_standing.</td>
+                    </tr>
+                    <tr>
+                        <td><code>action_timer_pause(reason_id, note)</code></td>
+                        <td><code>reason_id</code> (int), <code>note</code> (str, opcional)</td>
+                        <td><code>{status, state, total_seconds}</code></td>
+                        <td>Pausa el cronometro y registra el motivo y nota. Calcula el tiempo transcurrido desde el ultimo inicio.</td>
+                    </tr>
+                    <tr>
+                        <td><code>action_timer_stop()</code></td>
+                        <td>Ninguno</td>
+                        <td><code>{status, state, total_seconds}</code></td>
+                        <td>Detiene definitivamente el cronometro. Sincroniza con campos de stock_standing y activa bloqueo.</td>
+                    </tr>
+                    <tr>
+                        <td><code>action_timer_get_state()</code></td>
+                        <td>Ninguno</td>
+                        <td><code>{state, total_seconds, last_start, server_time}</code></td>
+                        <td>Consulta el estado actual del cronometro para sincronizar el widget JS del cliente.</td>
+                    </tr>
+                    <tr>
+                        <td><code>get_pause_reasons()</code></td>
+                        <td>Ninguno</td>
+                        <td><code>[{id, name}, ...]</code></td>
+                        <td>Retorna la lista de motivos de pausa activos para el dialogo del frontend.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">9.4 Tipos de Evento del Log</h3>
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>Tipo</th><th>Nombre</th><th>Cuando se crea</th></tr></thead>
+                <tbody>
+                    <tr><td><code>start</code></td><td>Inicio</td><td>Al iniciar el cronometro por primera vez (desde estado "Detenido")</td></tr>
+                    <tr><td><code>pause</code></td><td>Pausa</td><td>Al pausar el cronometro. Registra motivo y nota.</td></tr>
+                    <tr><td><code>resume</code></td><td>Reanudacion</td><td>Al reanudar el cronometro despues de una pausa</td></tr>
+                    <tr><td><code>stop</code></td><td>Detencion</td><td>Al detener el cronometro definitivamente</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">9.5 Componentes Frontend (OWL)</h3>
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>Archivo</th><th>Componente</th><th>Descripcion</th></tr></thead>
+                <tbody>
+                    <tr><td><code>timer_widget.js</code></td><td><code>BarcodeTimerWidget</code></td><td>Componente OWL principal. Muestra el display del tiempo y botones de control.</td></tr>
+                    <tr><td><code>pause_dialog.js</code></td><td><code>PauseReasonDialog</code></td><td>Dialogo modal OWL para seleccion de motivo de pausa con campo de nota.</td></tr>
+                    <tr><td><code>timer_service.js</code></td><td><code>TimerService</code></td><td>Servicio de comunicacion con el backend. Gestiona estado local y llamadas ORM.</td></tr>
+                    <tr><td><code>picking_barcode_ext.js</code></td><td>Patch</td><td>Extiende el componente de stock_barcode para inyectar el widget del cronometro.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">9.6 Sincronizacion con stock_standing</h3>
+        <p>El modulo mantiene compatibilidad bidireccional con los campos existentes del modulo <code>stock_standing</code>:</p>
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>Campo stock_standing</th><th>Sincronizacion</th><th>Cuando</th></tr></thead>
+                <tbody>
+                    <tr><td><code>cronometro_estado</code></td><td>Se pone en <code>True</code></td><td>Al iniciar el cronometro</td></tr>
+                    <tr><td><code>cronometro_inicial</code></td><td>Se registra el timestamp</td><td>Al iniciar el cronometro</td></tr>
+                    <tr><td><code>cronometro_acumulado</code></td><td>Se actualiza con el total</td><td>Al detener el cronometro</td></tr>
+                    <tr><td><code>cronometro_estado</code></td><td>Se pone en <code>False</code></td><td>Al detener el cronometro</td></tr>
+                    <tr><td><code>cronometro_bloqueo</code></td><td>Se pone en <code>True</code></td><td>Al detener el cronometro</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="margin: 30px 0 15px; color: var(--secondary);">9.7 Estructura de Archivos</h3>
+        <div class="code-block">
+<span class="kw">stock_barcode_timer/</span>
+├── <span class="val">__init__.py</span>
+├── <span class="val">__manifest__.py</span>
+├── <span class="kw">data/</span>
+│   └── <span class="val">pause_reason_data.xml</span>          <span style="color:#888;"># 6 motivos predefinidos</span>
+├── <span class="kw">models/</span>
+│   ├── <span class="val">__init__.py</span>
+│   ├── <span class="val">cronometro_pause_reason.py</span>     <span style="color:#888;"># Modelo de motivos</span>
+│   ├── <span class="val">cronometro_log.py</span>              <span style="color:#888;"># Modelo de eventos</span>
+│   └── <span class="val">stock_picking.py</span>               <span style="color:#888;"># Extension del picking</span>
+├── <span class="kw">security/</span>
+│   └── <span class="val">ir.model.access.csv</span>            <span style="color:#888;"># Permisos de acceso</span>
+├── <span class="kw">static/src/</span>
+│   ├── <span class="kw">js/</span>
+│   │   ├── <span class="val">timer_widget.js</span>            <span style="color:#888;"># Widget OWL del cronometro</span>
+│   │   ├── <span class="val">pause_dialog.js</span>            <span style="color:#888;"># Dialogo OWL de motivos</span>
+│   │   ├── <span class="val">timer_service.js</span>           <span style="color:#888;"># Servicio de backend</span>
+│   │   └── <span class="val">picking_barcode_ext.js</span>     <span style="color:#888;"># Patch al modulo de barras</span>
+│   ├── <span class="kw">scss/</span>
+│   │   └── <span class="val">timer.scss</span>                 <span style="color:#888;"># Estilos del cronometro</span>
+│   └── <span class="kw">xml/</span>
+│       └── <span class="val">timer_templates.xml</span>         <span style="color:#888;"># Templates OWL</span>
+└── <span class="kw">views/</span>
+    └── <span class="val">stock_picking_views.xml</span>         <span style="color:#888;"># Vistas y menus</span>
+        </div>
+    </div>
+
+    <!-- 10. FAQ -->
+    <div class="section" id="faq">
+        <div class="section-header">
+            <div class="section-icon mauve">&#10067;</div>
+            <h2>10. Preguntas Frecuentes <small>Dudas comunes resueltas</small></h2>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question"><span class="q-marker">Q</span>En que tipos de transferencia funciona el cronometro?</div>
+            <div class="faq-answer"><strong>En todos.</strong> El cronometro esta disponible en IN (Recepcion), INT (Transferencia Interna), PICK (Picking), PACK (Empaquetado) y OUT (Despacho). Cualquier transferencia abierta en el modulo de codigo de barras mostrara el widget del cronometro.</div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question"><span class="q-marker">Q</span>Puedo pausar el cronometro sin seleccionar un motivo?</div>
+            <div class="faq-answer"><strong>No.</strong> Es obligatorio seleccionar un motivo de pausa. El boton "Confirmar Pausa" permanece deshabilitado hasta que se elija una razon. Esto garantiza trazabilidad completa de las interrupciones.</div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question"><span class="q-marker">Q</span>El tiempo de pausa se cuenta en el total?</div>
+            <div class="faq-answer"><strong>No.</strong> El cronometro solo acumula tiempo cuando esta en estado "En Curso". Las pausas no suman al tiempo total. Asi se mide unicamente el tiempo efectivo de trabajo.</div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question"><span class="q-marker">Q</span>Que pasa si cierro el navegador con el cronometro corriendo?</div>
+            <div class="faq-answer">El estado del cronometro se guarda en el servidor. Al volver a abrir la transferencia en el modulo de barras, el cronometro recupera su estado y calcula el tiempo transcurrido correctamente usando los timestamps del servidor.</div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question"><span class="q-marker">Q</span>Puedo agregar nuevos motivos de pausa?</div>
+            <div class="faq-answer"><strong>Si.</strong> Un usuario con permisos de <em>Responsable de Inventario</em> puede ir a <strong>Inventario &gt; Configuracion &gt; Motivos de Pausa Cronometro</strong> y agregar, editar, reordenar o desactivar motivos segun las necesidades de la operacion.</div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question"><span class="q-marker">Q</span>El cronometro del modulo de barras se sincroniza con el del formulario?</div>
+            <div class="faq-answer"><strong>Si.</strong> Al iniciar el cronometro en el modulo de barras, se actualizan automaticamente los campos del modulo <code>stock_standing</code> (<code>cronometro_estado</code>, <code>cronometro_acumulado</code>, etc.). Al detener, se sincronizan de vuelta. Ambas interfaces reflejan el mismo estado.</div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question"><span class="q-marker">Q</span>Puedo reiniciar el cronometro una vez detenido?</div>
+            <div class="faq-answer">Una vez detenido, el cronometro activa un bloqueo (<code>cronometro_bloqueo</code>). El tiempo total queda registrado como definitivo. Para una nueva medicion se requiere una nueva transferencia.</div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question"><span class="q-marker">Q</span>Donde puedo ver un reporte de todos los tiempos?</div>
+            <div class="faq-answer">Cada picking tiene su pestana "Cronometro" con el registro detallado. Adicionalmente, el modelo <code>cronometro.log</code> puede consultarse desde <em>Ajustes &gt; Tecnico &gt; Modelos</em> para extraer datos de analisis. Tambien se puede exportar a Excel desde la vista de lista.</div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question"><span class="q-marker">Q</span>Se requiere la version Enterprise de Odoo?</div>
+            <div class="faq-answer"><strong>Si.</strong> El modulo <code>stock_barcode</code> (codigo de barras para inventario) es un modulo Enterprise de Odoo. Este cronometro lo extiende, por lo que requiere la version Enterprise de Odoo 16.</div>
+        </div>
+    </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+    <div class="company-name">COONDEV</div>
+    <div class="tagline">Coonsulting &amp; Development</div>
+    <div class="footer-divider"></div>
+    <p>Guia Funcional - Cronometro para Modulo de Barras</p>
+    <p>Modulo de extension para <strong>Odoo 16 Enterprise</strong> | Inventario / Codigo de Barras</p>
+    <p style="margin-top: 15px; font-size: 12px; opacity: 0.7;">Documento generado &bull; Marzo 2026</p>
+</div>
+
+</body>
+</html>
