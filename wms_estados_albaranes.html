@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Guía WMS — Estados de Albaranes (stock.picking) vía REST API</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; max-width: 980px; margin: 2em auto; padding: 0 1em; color: #222; line-height: 1.55; }
+        h1 { border-bottom: 2px solid #875A7B; padding-bottom: .3em; }
+        h2 { border-bottom: 1px solid #ddd; padding-bottom: .2em; margin-top: 2em; }
+        h3 { margin-top: 1.5em; }
+        code, pre { font-family: "SFMono-Regular", Consolas, monospace; }
+        pre { background: #f5f5f5; padding: 1em; border-left: 4px solid #875A7B; overflow-x: auto; font-size: .9em; }
+        code { background: #f0f0f0; padding: 2px 4px; border-radius: 3px; }
+        table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+        th, td { border: 1px solid #ddd; padding: .5em .75em; text-align: left; vertical-align: top; }
+        th { background: #f5f5f5; }
+        .badge { display: inline-block; padding: .15em .6em; border-radius: 4px; font-size: .85em; font-weight: bold; color: #fff; }
+        .badge-get { background: #28a745; }
+        .badge-post { background: #007bff; }
+        .badge-put { background: #fd7e14; }
+        .note { background: #fff8e1; border-left: 4px solid #ffc107; padding: .75em 1em; margin: 1em 0; }
+        .role { background: #eef5ff; border-left: 4px solid #007bff; padding: .75em 1em; margin: 1em 0; }
+        .state { display: inline-block; padding: .15em .55em; border-radius: 3px; font-size: .85em; font-weight: bold; font-family: "SFMono-Regular", Consolas, monospace; }
+        .s-draft    { background: #e0e0e0; color: #333; }
+        .s-waiting  { background: #ffe0b2; color: #6b3e00; }
+        .s-confirmed{ background: #fff3cd; color: #856404; }
+        .s-assigned { background: #cce5ff; color: #004085; }
+        .s-done     { background: #d4edda; color: #155724; }
+        .s-cancel   { background: #f8d7da; color: #721c24; }
+        ol li, ul li { margin: .3em 0; }
+    </style>
+</head>
+<body>
+
+<h1>Guía WMS — Estados de Albaranes (<code>stock.picking</code>) vía REST API</h1>
+
+<p>
+Esta guía documenta cómo el <strong>WMS</strong> puede <strong>consultar y devolver
+los estados</strong> de los albaranes (transferencias / <code>stock.picking</code>)
+de Odoo 17/18 mediante la REST API expuesta por el módulo <code>restful</code>.
+</p>
+
+<div class="role">
+    <strong>Alcance:</strong> esta documentación cubre exclusivamente la gestión
+    del campo <code>state</code> de <code>stock.picking</code>: cómo consultarlo,
+    cómo cambia automáticamente según las acciones invocadas desde WMS, y cómo
+    reflejar ese estado de vuelta hacia el WMS.
+</div>
+
+<h2>1. Ciclo de vida del estado (<code>state</code>)</h2>
+
+<p>
+El campo <code>state</code> de <code>stock.picking</code> es una selección controlada
+por Odoo. <strong>No debe escribirse directamente vía PUT</strong>; su valor cambia como
+consecuencia de las acciones invocadas (por ejemplo <code>action_confirm</code>,
+<code>action_assign</code>, <code>button_validate</code>) o por reglas internas del
+módulo <code>stock</code>.
+</p>
+
+<table>
+    <tr><th>Valor (<code>state</code>)</th><th>Etiqueta</th><th>Significado</th></tr>
+    <tr><td><span class="state s-draft">draft</span></td><td>Borrador</td><td>Picking recién creado, sin confirmar. Editable.</td></tr>
+    <tr><td><span class="state s-waiting">waiting</span></td><td>En espera de otra operación</td><td>Depende de otro movimiento que aún no ha terminado (flujos encadenados).</td></tr>
+    <tr><td><span class="state s-confirmed">confirmed</span></td><td>Esperando disponibilidad</td><td>Confirmado, pero sin stock reservado todavía.</td></tr>
+    <tr><td><span class="state s-assigned">assigned</span></td><td>Listo (reservado)</td><td>Stock reservado, listo para alistar/despachar/recibir.</td></tr>
+    <tr><td><span class="state s-done">done</span></td><td>Hecho</td><td>Picking validado; inventario actualizado.</td></tr>
+    <tr><td><span class="state s-cancel">cancel</span></td><td>Cancelado</td><td>Picking cancelado; no afecta inventario.</td></tr>
+</table>
+
+<h2>2. Autenticación</h2>
+<p><span class="badge badge-get">GET</span> <code>/api/auth/token</code></p>
+<pre><code>GET https://&lt;odoo_host&gt;/api/auth/token?login=&lt;user&gt;&amp;password=&lt;api_key&gt;&amp;db=&lt;db_name&gt;</code></pre>
+<p>Incluir en todas las llamadas siguientes el header <code>access_token: &lt;token&gt;</code> (guion bajo).</p>
+
+<h2>3. Consultar el estado de un albarán</h2>
+
+<h3>3.1 Por ID</h3>
+<p><span class="badge badge-get">GET</span> <code>/api/stock.picking/&lt;id&gt;</code></p>
+<pre><code>curl -X GET "https://&lt;odoo_host&gt;/api/stock.picking/123" \
+  -H "access_token: &lt;token&gt;"</code></pre>
+
+<p>Respuesta (referencial, campos relevantes):</p>
+<pre><code>{
+    "count": 1,
+    "data": [
+        {
+            "id": 123,
+            "name": "WH/OUT/00001",
+            "state": "assigned",
+            "picking_type_code": "outgoing",
+            "origin": "S00001",
+            "scheduled_date": "2026-04-24 10:00:00",
+            "date_done": false
+        }
+    ]
+}</code></pre>
+
+<h3>3.2 Por referencia externa (<code>origin</code>)</h3>
+<pre><code>curl -X GET "https://&lt;odoo_host&gt;/api/stock.picking/" \
+  -H "access_token: &lt;token&gt;" \
+  -d "limit=1" \
+  -d "domain=[('origin','=','WMS-OUT-000123')]"</code></pre>
+
+<h3>3.3 Listar albaranes filtrando por estado</h3>
+<pre><code>curl -X GET "https://&lt;odoo_host&gt;/api/stock.picking/" \
+  -H "access_token: &lt;token&gt;" \
+  -d "limit=50" -d "offset=0" \
+  -d "order=create_date desc" \
+  -d "domain=[('state','in',['assigned','confirmed']),('picking_type_code','=','outgoing')]"</code></pre>
+
+<h2>4. Acciones que modifican el estado</h2>
+<p>
+Las siguientes acciones cambian el <code>state</code> del picking como efecto colateral.
+El WMS debe invocarlas en el momento oportuno y <strong>consultar nuevamente</strong>
+el picking para obtener el estado resultante.
+</p>
+
+<table>
+    <tr><th>Acción</th><th>Endpoint</th><th>Transición de estado</th></tr>
+    <tr>
+        <td><code>action_confirm</code></td>
+        <td><code>POST /api/stock.picking/&lt;id&gt;/action_confirm</code></td>
+        <td><span class="state s-draft">draft</span> → <span class="state s-confirmed">confirmed</span> (o <span class="state s-waiting">waiting</span>)</td>
+    </tr>
+    <tr>
+        <td><code>action_assign</code></td>
+        <td><code>POST /api/stock.picking/&lt;id&gt;/action_assign</code></td>
+        <td><span class="state s-confirmed">confirmed</span> → <span class="state s-assigned">assigned</span> (si hay stock)</td>
+    </tr>
+    <tr>
+        <td><code>button_validate</code></td>
+        <td><code>POST /api/stock.picking/&lt;id&gt;/button_validate</code></td>
+        <td><span class="state s-assigned">assigned</span> → <span class="state s-done">done</span></td>
+    </tr>
+    <tr>
+        <td><code>action_cancel</code></td>
+        <td><code>POST /api/stock.picking/&lt;id&gt;/action_cancel</code></td>
+        <td>cualquiera → <span class="state s-cancel">cancel</span></td>
+    </tr>
+</table>
+
+<p>Ejemplo:</p>
+<pre><code>curl -X POST "https://&lt;odoo_host&gt;/api/stock.picking/123/button_validate" \
+  -H "access_token: &lt;token&gt;"</code></pre>
+
+<div class="note">
+<strong>Importante:</strong> el campo <code>state</code> es <em>read-only</em> desde la API.
+No se puede escribir con <code>PUT /api/stock.picking/&lt;id&gt;</code>. Si WMS envía
+<code>{"state": "done"}</code> el cambio será ignorado o rechazado por Odoo.
+</div>
+
+<h2>5. Patrón recomendado para WMS: “devolver el estado”</h2>
+<p>Tras cada interacción con Odoo, WMS debe <strong>recuperar y registrar</strong> el estado resultante:</p>
+
+<ol>
+    <li>Ejecutar la acción (<code>button_validate</code>, <code>action_assign</code>, etc.).</li>
+    <li>Hacer <code>GET /api/stock.picking/&lt;id&gt;</code> inmediatamente después.</li>
+    <li>Leer los campos <code>state</code>, <code>date_done</code>, <code>name</code> y <code>backorder_id</code>.</li>
+    <li>Reportar ese estado hacia los sistemas internos del WMS.</li>
+</ol>
+
+<pre><code># 1. Validar
+curl -X POST "https://&lt;odoo_host&gt;/api/stock.picking/123/button_validate" \
+  -H "access_token: &lt;token&gt;"
+
+# 2. Consultar estado resultante
+curl -X GET "https://&lt;odoo_host&gt;/api/stock.picking/123" \
+  -H "access_token: &lt;token&gt;"</code></pre>
+
+<h2>6. Campos útiles asociados al estado</h2>
+<table>
+    <tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr>
+    <tr><td><code>state</code></td><td>Selection</td><td>Estado actual del albarán (ver sección 1).</td></tr>
+    <tr><td><code>date_done</code></td><td>Datetime</td><td>Fecha de validación. Sólo se informa cuando <code>state = done</code>.</td></tr>
+    <tr><td><code>scheduled_date</code></td><td>Datetime</td><td>Fecha planificada.</td></tr>
+    <tr><td><code>backorder_id</code></td><td>Many2one</td><td>Si al validar se generó un backorder (faltantes), referencia al picking hijo.</td></tr>
+    <tr><td><code>picking_type_code</code></td><td>Selection</td><td>Tipo del albarán (<code>incoming</code>, <code>outgoing</code>, <code>internal</code>).</td></tr>
+    <tr><td><code>origin</code></td><td>Char</td><td>Referencia externa para correlacionar con el WMS.</td></tr>
+    <tr><td><code>move_ids</code> / <code>move_line_ids</code></td><td>One2many</td><td>Líneas y movimientos; también poseen su propio <code>state</code>.</td></tr>
+</table>
+
+<h2>7. Manejo de errores</h2>
+<table>
+    <tr><th>HTTP</th><th>Causa común</th><th>Acción recomendada (WMS)</th></tr>
+    <tr><td>401</td><td>Token inválido / expirado / header mal escrito</td><td>Regenerar token. Verificar header <code>access_token</code> (guion bajo).</td></tr>
+    <tr><td>403</td><td>Usuario sin permisos sobre <code>stock.picking</code></td><td>Ajustar grupos/permisos del usuario API.</td></tr>
+    <tr><td>404</td><td>Picking no existe (ID inválido o eliminado)</td><td>Re-sincronizar IDs; buscar por <code>origin</code>.</td></tr>
+    <tr><td>400 / 422</td><td>Estado incompatible con la acción (ej. validar un <code>draft</code>)</td><td>Verificar precondiciones; invocar <code>action_confirm</code> y <code>action_assign</code> antes de <code>button_validate</code>.</td></tr>
+    <tr><td>500</td><td>Error interno de Odoo</td><td>Log + reintento con <em>backoff</em>; escalar si persiste.</td></tr>
+</table>
+
+<h2>8. Checklist mínimo de integración de estados</h2>
+<ul>
+    <li>Consumir <code>GET /api/stock.picking/&lt;id&gt;</code> después de cada acción para leer <code>state</code>.</li>
+    <li>Persistir en el WMS la última fecha/estado observado y su origen (<code>origin</code>).</li>
+    <li>Nunca asumir transición; siempre re-consultar Odoo.</li>
+    <li>No intentar escribir <code>state</code> directamente con PUT.</li>
+    <li>Correlacionar siempre por <code>origin</code> cuando haya reintentos.</li>
+</ul>
+
+</body>
+</html>
